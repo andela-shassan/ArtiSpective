@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/vector_drawable_ic_home_white___px"
+            android:title="@string/home" />
+        <item
+            android:id="@+id/nav_user"
+            android:icon="@drawable/vector_drawable_ic_account_circle_white___px"
+            android:title="@string/profile" />
+        <item
+            android:id="@+id/nav_login"
+            android:icon="@drawable/vector_drawable_ic_lock_open_white___px"
+            android:title="@string/login" />
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/vector_drawable_ic_lock_outline_white___px"
+            android:title="@string/logout" />
+    </group>
+</menu>

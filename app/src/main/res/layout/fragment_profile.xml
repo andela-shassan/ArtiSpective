@@ -1,0 +1,79 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="artispective.blogspot.com.ng.artispective.activities.ProfileActivityFragment"
+    tools:showIn="@layout/activity_profile">
+
+    <TextView
+        android:id="@+id/profile_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:text="@string/app_name"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="@android:dimen/app_icon_size"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="7"
+        android:layout_marginBottom="30dp"
+        android:paddingLeft="20dp"
+        android:paddingStart="20dp"
+        android:paddingRight="1dp"
+        android:paddingEnd="1dp"
+        >
+
+        <TextView
+            android:id="@+id/name_label"
+            style="@style/user_profile_page"
+            android:text="@string/name_label" />
+
+        <TextView
+            android:id="@+id/name_text"
+            style="@style/user_profile_page_values"
+            android:hint="@string/user_full_name" />
+
+        <TextView
+            android:id="@+id/email_label"
+            style="@style/user_profile_page"
+            android:text="@string/prompt_email" />
+
+        <TextView
+            android:id="@+id/email_text"
+            style="@style/user_profile_page_values"
+            android:hint="@string/prompt_email" />
+
+        <TextView
+            android:id="@+id/phone_label"
+            style="@style/user_profile_page"
+            android:text="@string/phone_label" />
+
+        <TextView
+            android:id="@+id/phone_text"
+            style="@style/user_profile_page_values"
+            android:hint="@string/phone_number" />
+
+        <TextView
+            android:id="@+id/occupation_label"
+            style="@style/user_profile_page"
+            android:text="@string/occupation_hint" />
+
+        <TextView
+            android:id="@+id/occupation_text"
+            style="@style/user_profile_page_values"
+            android:hint="@string/occupation_hint" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,96 @@
+<resources>
+    <string name="app_name">ArtiSpective</string>
+    <string name="app_name2">ArtiSpective</string>
+    <string name="app_name_to">to</string>
+    <string name="app_name_welcome">Welcome</string>
+    <string name="app_name_slogan">...Your Best Place For Art Related Information</string>
+    <string name="welcome_screen_button">Continue</string>
+    <string name="app_secret_key">170F231E-8AC5-1E7C-FF18-F14172A62C00</string>
+    <string name="app_id">A9055167-61DE-81A4-FF76-A84111205300</string>
+    <string name="google_cloud_messaging_key">704818219857</string>
+    <string name="facebook_app_id">873457016099545</string>
+    <string name="title_activity_home">Home</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="exhibition_title_hint">Exhibition Title</string>
+    <string name="exhibition_details">Details of The Exhibition...</string>
+    <string name="exhibition_date">Exhibition Date</string>
+    <string name="exhibition_location">Exhibition Location</string>
+    <string name="title_activity_login">Sign In</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Login</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This emailAddress address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing emailAddress
+        completions."
+    </string>
+    <string name="read_external_storage">"Read External Storage permission are needed for accessing
+        event image"
+    </string>
+    <string name="error_empty_password">Password cannot be empty</string>
+
+    <!-- When there is no network text -->
+    <string name="no_network_text">Check Your Network And Try Again</string>
+    <string name="login_with">OR</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="facebook_login_button_text">Facebook Login Button</string>
+    <string name="action_sign_up">Sign Up</string>
+    <string name="register_question">Have an account?</string>
+    <string name="register_login">Login</string>
+    <string name="title_activity_register">Register</string>
+    <string name="prompt_confirm_password">Confirm Password</string>
+    <string name="occupation_hint">Craft</string>
+    <string name="full_name">Last Name, Other Names</string>
+    <string name="action_sign_up_short">Sign Up</string>
+    <string name="dont_have_account">New user?  Register</string>
+
+    <!-- Registration Errors Strings -->
+    <string name="error_empty_full_name">Name cannot be empty</string>
+    <string name="error_full_name_short">Name too short</string>
+    <string name="error_occupation">Occupation too short</string>
+    <string name="error_invalid_confirm_password">Passwords do not match!</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="error_phone_number_invalid">Phone Number Not Valid</string>
+    <string name="logged_out">Logout Successfully</string>
+    <string name="login_successful">Logged in successfully</string>
+    <string name="registration_successful">You have been registered successfully</string>
+
+    <!-- BigEvent form strings -->
+    <string name="use_phone_camera">Use phone camera</string>
+    <string name="clear_image">Clear image</string>
+    <string name="use_phone_gallery">Choose from the gallery</string>
+    <string name="event_name">Event Name</string>
+    <string name="event_date">Event Date (dd/mm/yyyy)</string>
+    <string name="event_location">Event Location</string>
+    <string name="event_details">Event Details</string>
+    <string name="save_button_text">Save</string>
+    <string name="exhibition_image_content_description">Exhibition Image</string>
+    <string name="title_activity_detail">Event Details</string>
+    <string name="title_activity_create_event_activity">New Event</string>
+    <string name="error_empty_event_name">Event Name cannot be empty</string>
+    <string name="error_empty_event_date">Event Date is required</string>
+    <string name="error_full_invalid_date">Enter Date in the specified format</string>
+    <string name="error_empty_event_location">Enter Event location</string>
+    <string name="event_images">Event Images</string>
+    <string name="detail_page_detail_text_hint">This is the details of this exhibition.</string>
+    <string name="home">Home</string>
+    <string name="profile">Profile</string>
+    <string name="title_activity_profile">Profile</string>
+    <string name="name_label">Name</string>
+    <string name="user_full_name">User Full Name</string>
+    <string name="phone_label">Phone</string>
+    <string name="share">Share</string>
+    <string name="update_profile_title">Update Profile</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+    <string name="action_refresh">Refresh</string>
+</resources>
