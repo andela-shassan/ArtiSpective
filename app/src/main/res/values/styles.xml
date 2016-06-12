@@ -1,0 +1,61 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:colorBackground">@color/bright_foreground_material_light</item>
+        <item name="android:colorForeground">@color/foreground_material_light</item>
+        <item name="android:textColorPrimary">@android:color/white</item>
+    </style>
+
+    <style name="welcome_page_button">
+        <item name="android:layout_width">200dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:background">@drawable/welcome_button</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:layout_marginTop">50dp</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="end_of_image_exists">
+        <item name="android:layout_toRightOf">@id/exhibition_image</item>
+        <item name="android:layout_toEndOf" tools:targetApi="jelly_bean_mr1">@id/exhibition_image</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginStart" tools:targetApi="jelly_bean_mr1">10dp</item>
+    </style>
+
+    <style name="left_right_padding">
+        <item name="android:paddingLeft">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingStart" tools:targetApi="jelly_bean_mr1">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingRight">@dimen/activity_horizontal_margin</item>
+        <item name="android:paddingEnd" tools:targetApi="jelly_bean_mr1">@dimen/activity_horizontal_margin</item>
+    </style>
+
+    <style name="user_profile_page">
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="user_profile_page_values">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+</resources>
