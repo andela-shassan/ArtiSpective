@@ -38,10 +38,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.support.design.widget.NavigationView.*;
+import static android.widget.AdapterView.*;
 
-public class HomeActivity extends AppCompatActivity implements
-        NavigationView.OnNavigationItemSelectedListener, LogoutAuthentication,
-        AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+
+public class HomeActivity extends AppCompatActivity implements OnNavigationItemSelectedListener,
+        LogoutAuthentication, OnItemClickListener, OnItemLongClickListener {
 
     private ArrayList<Event> events;
     boolean hasTriedFetch = false;
@@ -239,27 +241,41 @@ public class HomeActivity extends AppCompatActivity implements
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-        if (!Helper.getUserAdminStatus()){
+        final Event event = events.get(position);
+        if (!Helper.getUserAdminStatus() || !Helper.getUserData("user_id").matches(event
+                .getAddedBy().getId())){
             return false;
         }
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Delete this event? This cannot be undo!")
+        builder.setTitle("Choose an action")
+                .setMessage("Delete cannot be undo!")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        deleteEvent(position);
+                        deleteEvent(event);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.dismiss();
                     }
+                })
+                .setNeutralButton("Edit", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        editEvent(event);
+                    }
                 });
         builder.show();
         return true;
     }
 
-    private void deleteEvent(int position) {
-        final Event event = events.get(position);
+    private void editEvent(Event event) {
+        Intent intent = new Intent(this, CreateEventActivity.class);
+        intent.putExtra("event", event);
+        startActivity(intent);
+    }
+
+    private void deleteEvent(final Event event) {
         ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.REMOVE_EVENT)
                 .deleteEvent(Helper.getUserData("user_token"), Helper.getUserData("user_id"),
                         event.getId()).enqueue(new Callback<DeleteEvent>() {

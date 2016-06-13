@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.adapters.DetailPagerAdapter;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
+import artispective.blogspot.com.ng.artispective.utils.Constants;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 
 public class DetailActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
@@ -99,12 +100,14 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
     private void shareEventOnFacebook() {
         if (ShareDialog.canShow(ShareLinkContent.class)) {
             event = events.get(viewPager.getCurrentItem());
+            String u;
+            u = (event.getImages().size() > 0)? event.getImages().get(0): Constants.DEFAULT_IMAGE;
 
             ShareLinkContent content = new ShareLinkContent.Builder()
                     .setContentUrl(Uri.parse("http://artispective.blogspot.com.ng/"))
                     .setContentTitle(event.getTitle())
                     .setContentDescription(event.getDetails())
-                    .setImageUrl(Uri.parse(event.getImages().get(0)))
+                    .setImageUrl(Uri.parse(u))
                     .build();
             shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
         }

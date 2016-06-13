@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 import com.squareup.leakcanary.LeakCanary;
 
 public class ContextProvider extends Application {
@@ -15,7 +14,6 @@ public class ContextProvider extends Application {
         super.onCreate();
         context = getApplicationContext();
         FacebookSdk.sdkInitialize(context);
-        AppEventsLogger.activateApp(this);
         LeakCanary.install((Application) context);
     }
 
