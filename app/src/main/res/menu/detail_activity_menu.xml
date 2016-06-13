@@ -6,7 +6,7 @@
         android:id="@+id/share_event"
         android:icon="@drawable/share"
         android:title="@string/share"
-        android:orderInCategory="1"
-        app:showAsAction="always" />
+        android:orderInCategory="2"
+        app:showAsAction="ifRoom" />
 
 </menu>

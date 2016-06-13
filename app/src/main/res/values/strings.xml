@@ -93,4 +93,6 @@
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="action_refresh">Refresh</string>
+    <string name="edit_option_menu">Edit</string>
+    <string name="update_event_button">Update</string>
 </resources>

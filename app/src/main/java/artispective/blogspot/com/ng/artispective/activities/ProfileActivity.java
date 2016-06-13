@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,19 +16,14 @@ import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.User;
 import artispective.blogspot.com.ng.artispective.models.Users;
 import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
+import artispective.blogspot.com.ng.artispective.utils.Constants;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * User_id Preference key String = "user_id"
- * User_token Preference key String = "user_token"
- */
-
 public class ProfileActivity extends AppCompatActivity {
     private TextView app_name, userName, userEmail, userPhone, userOccupation;
-    private static final String USER_PROFILE = "http://artispective.herokuapp.com/api/v1/getUserProfile/{id}/";
     private User user;
     private ProgressDialog pd;
 
@@ -50,7 +44,6 @@ public class ProfileActivity extends AppCompatActivity {
         app_name.setTypeface(EasyFonts.tangerineBold(this));
 
         String token = Helper.getUserData("user_token");
-        Log.v("semiu token Profile", token);
         showProgress();
         getUserById(token, Helper.getUserData("user_id"));
         setUpFAB();
@@ -74,7 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void getUserById(String token, String id) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(USER_PROFILE)
+        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.USER_PROFILE)
                 .getUserProfile(token, id).enqueue(new Callback<Users>() {
             @Override
             public void onResponse(Call<Users> call, Response<Users> response) {
@@ -113,25 +106,13 @@ public class ProfileActivity extends AppCompatActivity {
         pd = new ProgressDialog(this);
         pd.setIndeterminate(true);
         pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        pd.setMessage("Please Wait...");
-        pd.setTitle("Loading Profile");
+        pd.setTitle("Getting Profile Ready!");
         pd.setCancelable(true);
         pd.show();
     }
 
     private void showMessage(String message){
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
-    private User mockUser(){
-        User user = new User();
-        user.setLastName("Andela");
-        user.setFirstName("M55 Moleye");
-        user.setEmailAddress("andela@andela.com");
-        user.setCraft("Talent accelerator");
-        user.setPassword("omoleye");
-        user.setPhoneNumber("0800800800800");
-        return user;
     }
 
 }

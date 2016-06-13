@@ -9,7 +9,7 @@ import java.util.List;
 
 import artispective.blogspot.com.ng.artispective.models.model.Event;
 
-public class AllEvents {
+public class Events {
 
     @SerializedName("success")
     @Expose

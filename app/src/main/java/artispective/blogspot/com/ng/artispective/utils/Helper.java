@@ -9,6 +9,8 @@ import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 public class Helper {
 
@@ -71,4 +73,14 @@ public class Helper {
         return cursor.getString(column_index);
     }
 
+    public static void hideSoftKeyboard(Context context, View view) {
+        try {
+            InputMethodManager im;
+            im = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            im.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }

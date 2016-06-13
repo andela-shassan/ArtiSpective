@@ -20,12 +20,10 @@ public class DetailPagerAdapter extends PagerAdapter {
     private Context context;
     private LayoutInflater layoutInflater;
     private ArrayList<Event> events;
-    private int currentPosition;
 
-    public DetailPagerAdapter(Context context, ArrayList<Event> events, int currentPosition) {
+    public DetailPagerAdapter(Context context, ArrayList<Event> events) {
         this.context = context;
         this.events = events;
-        this.currentPosition = currentPosition;
         layoutInflater = LayoutInflater.from(context);
     }
 
@@ -63,18 +61,11 @@ public class DetailPagerAdapter extends PagerAdapter {
         eventLocation.setText(event.getAddress());
         eventDate.setText(date);
 
-        String image = "";
-        if (event.getImages().size() > 0) {
-            image += event.getImages().get(0);
-        } else {
-            image += Constants.DEFAULT_IMAGE;
-        }
+        String url;
+        url = (event.getImages().size() > 0) ? event.getImages().get(0) : Constants.DEFAULT_IMAGE;
 
-        Picasso.with(context).load(image)
-                .placeholder(R.mipmap.default_image)
-                .error(R.mipmap.default_image)
-                .fit()
-                .into(eventImage);
+        Picasso.with(context).load(url).placeholder(R.mipmap.default_image)
+                .error(R.mipmap.default_image).fit().into(eventImage);
 
         container.addView(convertView);
 

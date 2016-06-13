@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.adapters.EventListAdapter;
 import artispective.blogspot.com.ng.artispective.interfaces.LogoutAuthentication;
-import artispective.blogspot.com.ng.artispective.models.events.AllEvents;
+import artispective.blogspot.com.ng.artispective.models.events.Events;
 import artispective.blogspot.com.ng.artispective.models.model.DeleteEvent;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
 import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
@@ -94,13 +94,13 @@ public class HomeActivity extends AppCompatActivity implements
         if (ConnectionChecker.isConnected()) {
             final ProgressDialog progressDialog = showProgressDialog();
             ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.GET_ALL_EVENTS)
-                    .getAllEvents().enqueue(new Callback<AllEvents>() {
+                    .getAllEvents().enqueue(new Callback<Events>() {
 
                 @Override
-                public void onResponse(Call<AllEvents> call, Response<AllEvents> response) {
+                public void onResponse(Call<Events> call, Response<Events> response) {
                     Log.v("semiu getAllEvent code", response.code() + "");
                     if (response.body() != null && response.code() == 200) {
-                        AllEvents bigEvent = response.body();
+                        Events bigEvent = response.body();
                         events = (ArrayList<Event>) bigEvent.getEvents();
                         Log.e("semiu events size", events.size() + " ");
                         setUpListView(events);
@@ -112,7 +112,7 @@ public class HomeActivity extends AppCompatActivity implements
                 }
 
                 @Override
-                public void onFailure(Call<AllEvents> call, Throwable t) {
+                public void onFailure(Call<Events> call, Throwable t) {
                     progressDialog.dismiss();
                     showToast("Failed to load the events. Please try again");
                 }
@@ -158,7 +158,7 @@ public class HomeActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            // reload the events from network
+            fetchExhibition();
             return true;
         }
 

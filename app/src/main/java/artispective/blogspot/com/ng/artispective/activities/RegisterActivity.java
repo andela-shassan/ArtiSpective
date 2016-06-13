@@ -84,6 +84,7 @@ public class RegisterActivity extends AppCompatActivity implements RegisterAuthe
     }
 
     private void attemptSignUp() {
+        Helper.hideSoftKeyboard(this, signUPButton);
         setErrorToNull();
 
         userName = this.fullName.getText().toString().trim();

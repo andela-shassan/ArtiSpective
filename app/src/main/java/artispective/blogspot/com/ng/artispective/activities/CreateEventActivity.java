@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -55,6 +56,12 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private File file, file2, file3;
     private String filePath, filePath2, filePath3;
     private String placeholderPath;
+    private Event event;
+    private String userToken;
+    private String userId;
+    private boolean updateEvent;
+    private RequestBody usersId, usersToken, eventsName, eventsDetail, eLocat, eventDated;
+    private RequestBody eventId;
 
 
     @Override
@@ -62,8 +69,29 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
         findViews();
-
         permissionChecker();
+
+        updateEvent = false;
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("event")) {
+            event = intent.getParcelableExtra("event");
+            setTitle("Update Event");
+            setUpEditView(event);
+            updateEvent = true;
+        }
+        userId = Helper.getUserData("user_id");
+        userToken = Helper.getUserData("user_token");
+
+    }
+
+    private void setUpEditView(Event event) {
+        String[] dates = event.getDate().split("-");
+        String date = dates[2].substring(0,2) + "/" + dates[1] + "/" + dates[0];
+        editName.setText(event.getTitle());
+        editDate.setText(date);
+        editLocation.setText(event.getAddress());
+        editDetail.setText(event.getDetails());
+        saveButton.setText(R.string.update_event_button);
     }
 
     private void permissionChecker() {
@@ -129,14 +157,15 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void attemptSaveEvent() {
-        if (file == null) {
+        Helper.hideSoftKeyboard(this, saveButton);
+        if (file == null && !updateEvent) {
             showToast("At least main image is required to post an event!");
             return;
         }
-        eventName = editName.getText().toString().trim();
-        eventDate = editDate.getText().toString().trim();
-        eventLocation = editLocation.getText().toString().trim();
-        eventDetail = editDetail.getText().toString().trim();
+        this.eventName = editName.getText().toString().trim();
+        this.eventDate = editDate.getText().toString().trim();
+        this.eventLocation = editLocation.getText().toString().trim();
+        this.eventDetail = editDetail.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
@@ -182,7 +211,25 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                 String[] dateArray = eventDate.split("/");
                 String date = dateArray[1] + "/" + dateArray[0] + "/" + dateArray[2];
 
-                uploadEvent(date);
+                if (event != null) {
+                    eventId = RequestBody.create(MediaType.parse("text/plain"), event.getId());
+
+                }
+                usersId = RequestBody.create(MediaType.parse("text/plain"), this.userId);
+                usersToken = RequestBody.create(MediaType.parse("text/plain"), this.userToken);
+                eventsName = RequestBody.create(MediaType.parse("text/plain"), this.eventName);
+                eventsDetail = RequestBody.create(MediaType.parse("text/plain"), this.eventDetail);
+                eLocat = RequestBody.create(MediaType.parse("text/plain"), this.eventLocation);
+                eventDated  = RequestBody.create(MediaType.parse("text/plain"), date);
+
+                if (event == null) {
+                    uploadEvent();
+                } else if (file != null) {
+                    updateEvent(file);
+                } else if (file == null) {
+                    updateEvent();
+                }
+
 
             } else {
                 ConnectionChecker.showNoNetwork();
@@ -191,31 +238,23 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void uploadEvent(String eventDate) {
-        String id = Helper.getUserData("user_id");
-        String token = Helper.getUserData("user_token");
-
+    private void uploadEvent() {
         MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
-
-        RequestBody userId = RequestBody.create(MediaType.parse("text/plain"), id);
-        RequestBody userToken = RequestBody.create(MediaType.parse("text/plain"), token);
-        RequestBody eventName = RequestBody.create(MediaType.parse("text/plain"), this.eventName);
-        RequestBody eDetail = RequestBody.create(MediaType.parse("text/plain"), this.eventDetail);
-        RequestBody eLocat = RequestBody.create(MediaType.parse("text/plain"), this.eventLocation);
-        RequestBody eventDated  = RequestBody.create(MediaType.parse("text/plain"), eventDate);
         RequestBody eventImage = RequestBody.create(MEDIA_TYPE_PNG, file);
 
         ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_EVENT_URL).addEvent(
-                userId, userToken, eventName, eDetail, eLocat, eventDated,eventImage).enqueue(
+                usersId, usersToken, eventsName, eventsDetail, eLocat, eventDated,
+                eventImage).enqueue(
 
                 new Callback<BigEvent>() {
 
                     @Override
                     public void onResponse(Call<BigEvent> call, Response<BigEvent> response) {
                         int code = response.code();
+                        Log.v("semiu create code", " "+ code );
                         if (code == 200) {
                             Event e = response.body().getEvent();
-                            showToast(e.getTitle() +" Created successfully");
+                            showToast(e.getTitle() + " Created successfully");
                             Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
                             CreateEventActivity.this.finish();
                         } else {
@@ -227,6 +266,71 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onFailure(Call<BigEvent> call, Throwable t) {
                         showToast("Failed to add the event");
+                        dismissProgressDialog();
+                    }
+                }
+        );
+    }
+
+    private void updateEvent(File file) {
+
+        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
+        RequestBody eventImage = RequestBody.create(MEDIA_TYPE_PNG, file);
+
+        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_EVENT_URL).updateEvent(
+                eventId, usersId, usersToken, eventsName, eventsDetail, eLocat,
+                eventDated, eventImage).enqueue(
+
+                new Callback<BigEvent>() {
+
+                    @Override
+                    public void onResponse(Call<BigEvent> call, Response<BigEvent> response) {
+                        int code = response.code();
+                        Log.v("semiu update code", " "+ code );
+                        if (code == 200) {
+                            Event e = response.body().getEvent();
+                            showToast(e.getTitle() + " Updated successfully");
+                            Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
+                            CreateEventActivity.this.finish();
+                        } else {
+                            showToast("Something went wrong update with file");
+                        }
+                        dismissProgressDialog();
+                    }
+
+                    @Override
+                    public void onFailure(Call<BigEvent> call, Throwable t) {
+                        showToast("Failed to update the event with file");
+                        dismissProgressDialog();
+                    }
+                }
+        );
+    }
+
+    private void updateEvent() {
+
+        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_EVENT_URL).updateEvent(
+                eventId, usersId, usersToken, eventsName, eventsDetail, eLocat, eventDated)
+                .enqueue(new Callback<BigEvent>() {
+
+                    @Override
+                    public void onResponse(Call<BigEvent> call, Response<BigEvent> response) {
+                        int code = response.code();
+                        Log.v("semiu update code", " "+ code );
+                        if (code == 200) {
+                            Event e = response.body().getEvent();
+                            showToast(e.getTitle() + " Updated successfully");
+                            Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
+                            CreateEventActivity.this.finish();
+                        } else {
+                            showToast("Something went wrong update without file");
+                        }
+                        dismissProgressDialog();
+                    }
+
+                    @Override
+                    public void onFailure(Call<BigEvent> call, Throwable t) {
+                        showToast("Failed to update the event without file");
                         dismissProgressDialog();
                     }
                 }
@@ -267,7 +371,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         progressDialog = new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Event "+eventName +" is being created");
+        progressDialog.setMessage("Event " + eventName + " is being created");
         progressDialog.setTitle("Uploading Data");
         progressDialog.show();
     }
@@ -304,7 +408,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                 setBitmapToImageView(resultCode, data, eventImage2);
                 bitmap2 = placeHolderBitmap;
                 filePath2 = placeholderPath;
-                file = new File(filePath2);
+                file2 = new File(filePath2);
                 break;
             case SELECT_IMAGE_CODE3:
                 setBitmapToImageView(resultCode, data, eventImage3);
@@ -326,8 +430,6 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                 Bitmap b = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
                 imageView.setImageBitmap(b);
                 placeHolderBitmap = b;
-//                Uri uri = handleImageUri(data.getData());
-//                placeholderPath = getPathFromURI(uri);
                 placeholderPath = Helper.getRealPathFromURI_API19(this, data.getData());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

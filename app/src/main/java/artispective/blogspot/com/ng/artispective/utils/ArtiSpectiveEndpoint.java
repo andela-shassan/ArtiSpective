@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 
 import artispective.blogspot.com.ng.artispective.models.Users;
-import artispective.blogspot.com.ng.artispective.models.events.AllEvents;
+import artispective.blogspot.com.ng.artispective.models.events.Events;
 import artispective.blogspot.com.ng.artispective.models.model.BigEvent;
 import artispective.blogspot.com.ng.artispective.models.model.DeleteEvent;
 import okhttp3.Cache;
@@ -63,13 +63,29 @@ public interface ArtiSpectiveEndpoint {
                             @Part("address") RequestBody address, @Part("date") RequestBody date,
                             @Part("eventImage\"; filename=\"pp.png\" ") RequestBody image);
 
+    @Multipart
+    @POST(Constants.UPDATE_EVENT)
+    Call<BigEvent> updateEvent(@Part("eventId") RequestBody eveId, @Part("userId") RequestBody usId,
+                               @Part("token") RequestBody token, @Part("title") RequestBody title,
+                               @Part("details") RequestBody dtls, @Part("address") RequestBody adrs,
+                               @Part("date") RequestBody date,
+                               @Part("eventImage\"; filename=\"pp.png\" ") RequestBody image);
+
+    @Multipart
+    @POST(Constants.UPDATE_EVENT)
+    Call<BigEvent> updateEvent(@Part("eventId") RequestBody eveId, @Part("userId") RequestBody usId,
+                               @Part("token") RequestBody token, @Part("title") RequestBody title,
+                               @Part("details") RequestBody dtls, @Part("address") RequestBody adrs,
+                               @Part("date") RequestBody date);
+
+
     @FormUrlEncoded
     @POST(Constants.REMOVE_EVENT)
     Call<DeleteEvent> deleteEvent(@Field("token") String token, @Field("userId") String userId,
                                    @Field("eventId") String eventId);
 
     @GET(Constants.GET_ALL_EVENTS)
-    Call<AllEvents> getAllEvents();
+    Call<Events> getAllEvents();
 
     class Factory {
         private static ArtiSpectiveEndpoint artiSpectiveEndpoint;
