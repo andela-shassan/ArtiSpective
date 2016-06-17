@@ -21,7 +21,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -159,7 +158,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private void attemptSaveEvent() {
         Helper.hideSoftKeyboard(this, saveButton);
         if (file == null && !updateEvent) {
-            showToast("At least main image is required to post an event!");
+            Helper.showToast("At least main image is required to post an event!");
             return;
         }
         this.eventName = editName.getText().toString().trim();
@@ -254,18 +253,18 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                         Log.v("semiu create code", " "+ code );
                         if (code == 200) {
                             Event e = response.body().getEvent();
-                            showToast(e.getTitle() + " Created successfully");
-                            Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
+                            Helper.showToast(e.getTitle() + " Created successfully");
+                            Helper.launchActivity(CreateEventActivity.this, EventActivity.class);
                             CreateEventActivity.this.finish();
                         } else {
-                            showToast("Something went wrong");
+                            Helper.showToast("Something went wrong");
                         }
                         dismissProgressDialog();
                     }
 
                     @Override
                     public void onFailure(Call<BigEvent> call, Throwable t) {
-                        showToast("Failed to add the event");
+                        Helper.showToast("Failed to add the event");
                         dismissProgressDialog();
                     }
                 }
@@ -289,18 +288,18 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                         Log.v("semiu update code", " "+ code );
                         if (code == 200) {
                             Event e = response.body().getEvent();
-                            showToast(e.getTitle() + " Updated successfully");
-                            Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
+                            Helper.showToast(e.getTitle() + " Updated successfully");
+                            Helper.launchActivity(CreateEventActivity.this, EventActivity.class);
                             CreateEventActivity.this.finish();
                         } else {
-                            showToast("Something went wrong update with file");
+                            Helper.showToast("Something went wrong update with file");
                         }
                         dismissProgressDialog();
                     }
 
                     @Override
                     public void onFailure(Call<BigEvent> call, Throwable t) {
-                        showToast("Failed to update the event with file");
+                        Helper.showToast("Failed to update the event with file");
                         dismissProgressDialog();
                     }
                 }
@@ -319,18 +318,18 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                         Log.v("semiu update code", " "+ code );
                         if (code == 200) {
                             Event e = response.body().getEvent();
-                            showToast(e.getTitle() + " Updated successfully");
-                            Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
+                            Helper.showToast(e.getTitle() + " Updated successfully");
+                            Helper.launchActivity(CreateEventActivity.this, EventActivity.class);
                             CreateEventActivity.this.finish();
                         } else {
-                            showToast("Something went wrong update without file");
+                            Helper.showToast("Something went wrong update without file");
                         }
                         dismissProgressDialog();
                     }
 
                     @Override
                     public void onFailure(Call<BigEvent> call, Throwable t) {
-                        showToast("Failed to update the event without file");
+                        Helper.showToast("Failed to update the event without file");
                         dismissProgressDialog();
                     }
                 }
@@ -437,10 +436,6 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                 e.printStackTrace();
             }
         }
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
 

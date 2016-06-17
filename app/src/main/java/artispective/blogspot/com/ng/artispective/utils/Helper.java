@@ -11,6 +11,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 public class Helper {
 
@@ -67,8 +68,7 @@ public class Helper {
     public static String getRealPathFromURI_BelowAPI11(Context context, Uri contentUri) {
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-        int column_index
-                = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
@@ -82,5 +82,9 @@ public class Helper {
             e.printStackTrace();
         }
 
+    }
+
+    public static void showToast(String message) {
+        Toast.makeText(ContextProvider.getContext(), message, Toast.LENGTH_LONG).show();
     }
 }

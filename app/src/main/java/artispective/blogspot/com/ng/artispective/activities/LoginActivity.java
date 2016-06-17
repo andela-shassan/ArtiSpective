@@ -3,7 +3,6 @@ package artispective.blogspot.com.ng.artispective.activities;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +15,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
@@ -165,22 +163,17 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
 
     @Override
     public void onSuccess() {
-        showToast("Login Successful");
-        Intent home = new Intent(this, HomeActivity.class);
-        home.putExtra("login", "successful");
-        startActivity(home);
+        Helper.showToast("Login Successful");
+        Helper.launchActivity(this, HomeActivity.class);
         finish();
     }
 
     @Override
     public void onFailure() {
-        showToast("Something went wrong. Please try again");
+        Helper.showToast("Something went wrong. Please try again");
         recreate();
     }
 
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
 
 }
 

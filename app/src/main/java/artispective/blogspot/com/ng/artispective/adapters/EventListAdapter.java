@@ -19,7 +19,7 @@ import artispective.blogspot.com.ng.artispective.utils.Constants;
 public class EventListAdapter extends ArrayAdapter<Event> {
 
     public EventListAdapter(Context context, ArrayList<Event> events) {
-        super(context, R.layout.exhibition_layout, events);
+        super(context, R.layout.event_list_layout, events);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class EventListAdapter extends ArrayAdapter<Event> {
 
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
-            convertView = inflater.inflate(R.layout.exhibition_layout, parent, false);
+            convertView = inflater.inflate(R.layout.event_list_layout, parent, false);
             viewHolder = new ViewHolder(convertView);
             convertView.setTag(viewHolder);
         } else {

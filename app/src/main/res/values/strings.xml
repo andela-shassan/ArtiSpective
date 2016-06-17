@@ -95,4 +95,7 @@
     <string name="action_refresh">Refresh</string>
     <string name="edit_option_menu">Edit</string>
     <string name="update_event_button">Update</string>
+    <string name="events">Events</string>
+    <string name="article_title">Article Title</string>
+    <string name="article_details">Article\'s Details</string>
 </resources>
