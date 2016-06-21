@@ -2,6 +2,7 @@ package artispective.blogspot.com.ng.artispective.adapters;
 
 import android.content.Context;
 import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +20,14 @@ import artispective.blogspot.com.ng.artispective.models.article.Post;
 /**
  * Created by Nobest on 20/06/2016.
  */
-public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnClickListener {
+public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnClickListener,
+        ViewPager.OnPageChangeListener {
     private Context context;
     private LayoutInflater layoutInflater;
     private ArrayList<Post> posts;
     private ImageView imageView;
     private CommentClickListener commentClickListener;
+    private int currentPosition;
 
     public ArticleDetailPagerAdapter(Context context, CommentClickListener commentClickListener,
                                      ArrayList<Post> posts) {
@@ -77,6 +80,7 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
                 .error(R.mipmap.default_image).fit().into(articleImage);
 
         container.addView(convertView);
+        currentPosition = position - 1;
 
         return convertView;
     }
@@ -97,10 +101,25 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
             case R.id.article_comment_image:
             case R.id.article_comment_counter:
             case R.id.add_comment_article:
-                commentClickListener.onCommentClick();
+                commentClickListener.onCommentClick(currentPosition);
                 break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        currentPosition = position - 1;
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        currentPosition = position -1;
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

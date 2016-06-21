@@ -29,7 +29,7 @@ public class Post implements Parcelable {
     private String id;
     @SerializedName("comments")
     @Expose
-    private List<Object> comments = new ArrayList<Object>();
+    private List<PostComment> comments = new ArrayList<>();
     @SerializedName("source")
     @Expose
     private String source;
@@ -79,11 +79,11 @@ public class Post implements Parcelable {
         this.id = id;
     }
 
-    public List<Object> getComments() {
+    public List<PostComment> getComments() {
         return comments;
     }
 
-    public void setComments(List<Object> comments) {
+    public void setComments(List<PostComment> comments) {
         this.comments = comments;
     }
 
@@ -127,7 +127,7 @@ public class Post implements Parcelable {
         this.heading = in.readString();
         this.body = in.readString();
         this.id = in.readString();
-        this.comments = new ArrayList<Object>();
+        this.comments = new ArrayList<PostComment>();
         in.readList(this.comments, List.class.getClassLoader());
         this.source = in.readString();
         this.datePosted = in.readString();

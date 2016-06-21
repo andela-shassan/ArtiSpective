@@ -105,7 +105,10 @@ public interface ArtiSpectiveEndpoint {
     @GET(Constants.GET_ALL_POST_URL)
     Call<GetArticles> getAllArticles();
 
-
+    @FormUrlEncoded
+    @POST(Constants.ADD_COMMENT_URL)
+    Call<DeleteEvent> addComment(@Field("token") String token, @Field("userId") String userId,
+                                  @Field("postId") String eventId, @Field("comment") String comment);
 
     class Factory {
         private static ArtiSpectiveEndpoint artiSpectiveEndpoint;

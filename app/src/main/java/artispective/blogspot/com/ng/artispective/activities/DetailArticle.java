@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -17,7 +18,9 @@ import artispective.blogspot.com.ng.artispective.interfaces.CommentClickListener
 import artispective.blogspot.com.ng.artispective.models.article.Post;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 
-public class DetailArticle extends AppCompatActivity implements ViewPager.OnPageChangeListener, CommentClickListener {
+public class DetailArticle extends AppCompatActivity implements ViewPager.OnPageChangeListener,
+        CommentClickListener {
+
     private ArticleDetailPagerAdapter pagerAdapter;
     private ArrayList<Post> posts;
     private int currentPosition;
@@ -67,7 +70,8 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+        Post post = posts.get(position);
+        Log.d("semiu post scroll", post.getHeading() +" "+post.getId());
     }
 
     @Override
@@ -81,7 +85,9 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
     }
 
     @Override
-    public void onCommentClick() {
-        Helper.showToast("Comment clicked now now");
+    public void onCommentClick(int position) {
+        Post post = posts.get(position);
+        Log.d("semiu post clicked", post.getHeading() +" "+post.getId());
+        Helper.showToast(post.getHeading() + " clicked");
     }
 }
