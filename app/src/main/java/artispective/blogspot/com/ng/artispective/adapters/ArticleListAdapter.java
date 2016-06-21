@@ -64,7 +64,7 @@ public class ArticleListAdapter extends ArrayAdapter<Post> {
             article_title = (TextView) itemView.findViewById(R.id.article_title);
             article_body = (TextView) itemView.findViewById(R.id.article_details);
             article_date = (TextView) itemView.findViewById(R.id.article_posted_date);
-            article_comment = (TextView) itemView.findViewById(R.id.article_comment_counter);
+            article_comment = (TextView) itemView.findViewById(R.id.comment_counter);
             article_image = (ImageView) itemView.findViewById(R.id.article_image);
 
         }

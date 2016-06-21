@@ -13,9 +13,11 @@ import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.adapters.ArticleDetailPagerAdapter;
+import artispective.blogspot.com.ng.artispective.interfaces.CommentClickListener;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
+import artispective.blogspot.com.ng.artispective.utils.Helper;
 
-public class DetailArticle extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class DetailArticle extends AppCompatActivity implements ViewPager.OnPageChangeListener, CommentClickListener {
     private ArticleDetailPagerAdapter pagerAdapter;
     private ArrayList<Post> posts;
     private int currentPosition;
@@ -31,7 +33,7 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
 
         getEventsAndPosition();
 
-        pagerAdapter = new ArticleDetailPagerAdapter(this, posts);
+        pagerAdapter = new ArticleDetailPagerAdapter(this, this, posts);
 
         viewPager = (ViewPager) findViewById(R.id.articlePager);
         viewPager.setAdapter(pagerAdapter);
@@ -76,5 +78,10 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    @Override
+    public void onCommentClick() {
+        Helper.showToast("Comment clicked now now");
     }
 }

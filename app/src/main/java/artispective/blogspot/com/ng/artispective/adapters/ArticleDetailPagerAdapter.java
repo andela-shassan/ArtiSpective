@@ -13,21 +13,25 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
+import artispective.blogspot.com.ng.artispective.interfaces.CommentClickListener;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
 
 /**
  * Created by Nobest on 20/06/2016.
  */
-public class ArticleDetailPagerAdapter extends PagerAdapter{
+public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnClickListener {
     private Context context;
     private LayoutInflater layoutInflater;
     private ArrayList<Post> posts;
     private ImageView imageView;
+    private CommentClickListener commentClickListener;
 
-    public ArticleDetailPagerAdapter(Context context, ArrayList<Post> posts) {
+    public ArticleDetailPagerAdapter(Context context, CommentClickListener commentClickListener,
+                                     ArrayList<Post> posts) {
         this.context = context;
         this.posts = posts;
         layoutInflater = LayoutInflater.from(context);
+        this.commentClickListener = commentClickListener;
     }
 
     @Override
@@ -44,8 +48,8 @@ public class ArticleDetailPagerAdapter extends PagerAdapter{
     public Object instantiateItem(ViewGroup container, int position) {
 
         Post post = posts.get(position);
-        TextView articleTitle, articleDetails, articleDate, articleComment;
-        ImageView articleImage;
+        TextView articleTitle, articleDetails, articleDate, articleComment, addComment;
+        ImageView articleImage, articleCommentImage;
 
         View convertView = layoutInflater.inflate(R.layout.content_detail_article, container, false);
 
@@ -54,6 +58,11 @@ public class ArticleDetailPagerAdapter extends PagerAdapter{
         articleComment = (TextView) convertView.findViewById(R.id.article_comment_counter);
         articleDate = (TextView) convertView.findViewById(R.id.article_posted_date);
         articleImage = (ImageView) convertView.findViewById(R.id.post_image);
+        addComment = (TextView) convertView.findViewById(R.id.add_comment_article);
+        articleCommentImage = (ImageView) convertView.findViewById(R.id.article_comment_image);
+        articleCommentImage.setOnClickListener(this);
+        addComment.setOnClickListener(this);
+        articleComment.setOnClickListener(this);
         imageView = articleImage;
 
         String[] dateArray = post.getDatePosted().split("-");
@@ -81,4 +90,17 @@ public class ArticleDetailPagerAdapter extends PagerAdapter{
         return this.imageView;
     }
 
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id) {
+            case R.id.article_comment_image:
+            case R.id.article_comment_counter:
+            case R.id.add_comment_article:
+                commentClickListener.onCommentClick();
+                break;
+            default:
+                break;
+        }
+    }
 }

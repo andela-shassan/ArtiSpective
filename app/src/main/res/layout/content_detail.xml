@@ -70,7 +70,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/detail_page_detail_text_hint"
-                android:scrollbars="vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
         </ScrollView>

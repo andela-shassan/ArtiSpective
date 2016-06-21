@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/articleList"
@@ -11,13 +11,15 @@
 
         <ImageView
             android:id="@+id/article_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
             android:scaleType="fitXY" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center|bottom"
+            android:background="@color/cardview_dark_background"
             android:paddingBottom="5dp">
 
             <TextView
@@ -45,25 +47,23 @@
                 android:maxLines="2" />
 
             <ImageView
-                android:id="@+id/article_comment_image"
+                android:id="@+id/article_comment_image_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start|bottom"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
-                android:tint="@color/colorPrimary"
                 android:layout_alignParentBottom="true"
-                android:background="@android:color/transparent"
                 android:contentDescription="@string/article_cpmment"
-                android:src="@drawable/vector_drawable_ic_comment_white___px"
+                android:src="@drawable/comments"
                 />
 
             <TextView
-                android:id="@+id/article_comment_counter"
+                android:id="@+id/comment_counter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/article_comment_image"
-                android:layout_toRightOf="@id/article_comment_image"
+                android:layout_toEndOf="@id/article_comment_image_view"
+                android:layout_toRightOf="@id/article_comment_image_view"
                 android:layout_marginLeft="5dp"
                 android:layout_marginStart="5dp"
                 android:layout_alignParentBottom="true"
@@ -84,7 +84,7 @@
 
         </RelativeLayout>
 
-    </LinearLayout>
+    </FrameLayout>
 
 
 </android.support.v7.widget.CardView>
