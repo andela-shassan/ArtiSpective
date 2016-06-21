@@ -7,6 +7,21 @@
         android:icon="@drawable/share"
         android:title="@string/share"
         android:orderInCategory="2"
+        app:actionViewClass="android.widget.Spinner"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/add_to_calendar"
+        android:title="@string/reminder"
+        android:icon="@drawable/vector_drawable_ic_perm_contact_calendar_white___px"
+        android:orderInCategory="3"
+        app:showAsAction="ifRoom"
+        />
+
 </menu>
+
+<!--
+    app:actionProviderClass="android.support.v7.widget.ShareActionProvider"
+            app:actionViewClass="android.widget.Spinner"
+
+-->

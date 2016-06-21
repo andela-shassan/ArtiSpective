@@ -20,6 +20,7 @@ public class DetailPagerAdapter extends PagerAdapter {
     private Context context;
     private LayoutInflater layoutInflater;
     private ArrayList<Event> events;
+    private ImageView imageView;
 
     public DetailPagerAdapter(Context context, ArrayList<Event> events) {
         this.context = context;
@@ -51,7 +52,7 @@ public class DetailPagerAdapter extends PagerAdapter {
         eventDate = (TextView) convertView.findViewById(R.id.detail_event_date);
         eventLocation = (TextView) convertView.findViewById(R.id.detail_event_location);
         eventImage = (ImageView) convertView.findViewById(R.id.detail_event_images);
-
+        imageView = eventImage;
 
         String[] dateArray = event.getDate().split("-");
         String date = dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
@@ -75,6 +76,10 @@ public class DetailPagerAdapter extends PagerAdapter {
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         container.removeView((View) object);
+    }
+
+    public ImageView getImageView() {
+        return this.imageView;
     }
 
 

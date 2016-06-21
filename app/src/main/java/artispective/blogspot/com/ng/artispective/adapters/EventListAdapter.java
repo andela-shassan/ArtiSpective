@@ -43,14 +43,10 @@ public class EventListAdapter extends ArrayAdapter<Event> {
         viewHolder.exhibition_date.setText(date);
         viewHolder.exhibition_location.setText(event.getAddress());
 
-        String image = "";
-        if (event.getImages().size() > 0) {
-            image += event.getImages().get(0);
-        } else {
-            image += Constants.DEFAULT_IMAGE;
-        }
+        String img = "";
+        img = (event.getImages().size() > 0) ? event.getImages().get(0) : Constants.DEFAULT_IMAGE;
 
-        Picasso.with(getContext()).load(image)
+        Picasso.with(getContext()).load(img)
                 .resize(100, 100)
                 .placeholder(R.mipmap.default_image)
                 .error(R.mipmap.default_image)

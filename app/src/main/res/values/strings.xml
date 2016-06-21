@@ -98,4 +98,18 @@
     <string name="events">Events</string>
     <string name="article_title">Article Title</string>
     <string name="article_details">Article\'s Details</string>
+    <string name="reminder">Reminder</string>
+    <string name="article_cpmment">Comments</string>
+
+    <string-array name="share_array">
+        <item></item>
+        <item>Facebook</item>
+        <item>Twitter</item>
+        <item>Google+</item>
+    </string-array>
+    <string name="title_activity_detail_article">Article</string>
+    <string name="article_title_hint">Article Title</string>
+    <string name="comment">Comment</string>
+    <string name="comment_counter">0</string>
+
 </resources>

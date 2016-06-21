@@ -6,6 +6,8 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 
 import artispective.blogspot.com.ng.artispective.models.Users;
+import artispective.blogspot.com.ng.artispective.models.article.ArticleResponse;
+import artispective.blogspot.com.ng.artispective.models.article.GetArticles;
 import artispective.blogspot.com.ng.artispective.models.events.Events;
 import artispective.blogspot.com.ng.artispective.models.model.BigEvent;
 import artispective.blogspot.com.ng.artispective.models.model.DeleteEvent;
@@ -86,6 +88,24 @@ public interface ArtiSpectiveEndpoint {
 
     @GET(Constants.GET_ALL_EVENTS)
     Call<Events> getAllEvents();
+
+    @Multipart
+    @POST(Constants.ADD_POST_URL)
+    Call<ArticleResponse> addArticle(@Header("x-access-token") String token,@Part("userId") RequestBody userId,
+                                     @Part("heading") RequestBody heading, @Part("body") RequestBody body,
+                                     @Part("postImage\"; filename=\"postImage.png\" ") RequestBody image);
+
+    @Multipart
+    @PUT(Constants.UPDATE_POST_URL)
+    Call<BigEvent> updateAtricle(@Part("userId") RequestBody userId, @Part("postId") RequestBody postId,
+                              @Part("token") RequestBody token,
+                              @Part("heading") RequestBody heading, @Part("body") RequestBody body,
+                              @Part("postImage\"; filename=\"postImage.png\" ") RequestBody image);
+
+    @GET(Constants.GET_ALL_POST_URL)
+    Call<GetArticles> getAllArticles();
+
+
 
     class Factory {
         private static ArtiSpectiveEndpoint artiSpectiveEndpoint;

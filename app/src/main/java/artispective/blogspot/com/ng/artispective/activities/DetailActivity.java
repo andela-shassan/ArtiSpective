@@ -4,12 +4,20 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
@@ -22,7 +30,8 @@ import artispective.blogspot.com.ng.artispective.models.model.Event;
 import artispective.blogspot.com.ng.artispective.utils.Constants;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 
-public class DetailActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener {
+public class DetailActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener,
+        AdapterView.OnItemSelectedListener {
     private ArrayList<Event> events;
     private int currentPosition;
     private ShareDialog shareDialog;
@@ -31,12 +40,15 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
     private ViewPager viewPager;
     private String userId;
     private FloatingActionButton floatingActionButton;
+    private ShareActionProvider shareActionProvider;
+    private Intent shareIntent;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -84,14 +96,32 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail_activity_menu, menu);
-        return super.onCreateOptionsMenu(menu);
+        MenuItem item = menu.findItem(R.id.share_event);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.share_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
+        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+        prepareShareIntent(detailPagerAdapter.getImageView());
+        attachShareIntentAction();
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        event = events.get(viewPager.getCurrentItem());
         if (id == R.id.share_event) {
-            shareEventOnFacebook();
+           // shareEventOnFacebook();
+        } else if (id == R.id.add_to_calendar) {
+              Helper.addToCalendar(this, event);
+//            Helper.sendNote(this, event);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -136,5 +166,29 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
     protected void onDestroy() {
         viewPager.removeOnPageChangeListener(this);
         super.onDestroy();
+    }
+
+    public void prepareShareIntent(ImageView ivImage) {
+        Uri bmpUri = Helper.getLocalBitmapUri(this,ivImage);
+        shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri);
+        shareIntent.setType("image/*");
+    }
+
+    public void attachShareIntentAction() {
+        if (shareActionProvider != null && shareIntent != null)
+            shareActionProvider.setShareIntent(shareIntent);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Toast.makeText(this, parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+        Log.d("semiu Selected = ", parent.getItemAtPosition(position).toString());
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }

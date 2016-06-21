@@ -5,13 +5,27 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.CalendarContract;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Calendar;
+
+import artispective.blogspot.com.ng.artispective.models.model.Event;
 
 public class Helper {
 
@@ -86,5 +100,63 @@ public class Helper {
 
     public static void showToast(String message) {
         Toast.makeText(ContextProvider.getContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    public static void addToCalendar(Context context, Event event) {
+        Calendar beginTime = Calendar.getInstance();
+        beginTime.set(2012, 0, 19, 7, 30);
+        Calendar endTime = Calendar.getInstance();
+        endTime.set(2012, 0, 19, 8, 30);
+        Intent intent = new Intent(Intent.ACTION_INSERT)
+                .setData(CalendarContract.Events.CONTENT_URI)
+                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+                .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+                .putExtra(CalendarContract.Events.TITLE, event.getTitle())
+                .putExtra(CalendarContract.Events.DESCRIPTION, event.getDetails().substring(0, 100))
+                .putExtra(CalendarContract.Events.EVENT_LOCATION, event.getAddress())
+                .putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY)
+                .putExtra(Intent.EXTRA_EMAIL, "rowan@example.com,trevor@example.com");
+        context.startActivity(intent);
+
+    }
+
+    public static void sendNote(Context context, Event event) {
+        String u;
+        u = (event.getImages().size() > 0)? event.getImages().get(0): Constants.DEFAULT_IMAGE;
+        String text = "Look at my awesome picture";
+        Uri pictureUri = Uri.parse(u);
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, event.getDetails());
+        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+        shareIntent.putExtra(Intent.EXTRA_TITLE, event.getTitle());
+        shareIntent.setType("image/*");
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(Intent.createChooser(shareIntent, "Share images..."));
+    }
+
+
+    @Nullable
+    public static Uri getLocalBitmapUri(Context context, ImageView imageView) {
+        Drawable drawable = imageView.getDrawable();
+        Bitmap bmp = null;
+        if (drawable instanceof BitmapDrawable){
+            bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        } else {
+            return null;
+        }
+        Uri bmpUri = null;
+        try {
+
+            File file =  new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+                    "share_image_" + System.currentTimeMillis() + ".png");
+            FileOutputStream out = new FileOutputStream(file);
+            bmp.compress(Bitmap.CompressFormat.PNG, 60, out);
+            out.close();
+            bmpUri = Uri.fromFile(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bmpUri;
     }
 }

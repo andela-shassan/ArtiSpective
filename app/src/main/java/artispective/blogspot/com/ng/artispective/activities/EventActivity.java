@@ -13,7 +13,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -114,9 +113,7 @@ public class EventActivity extends AppCompatActivity implements OnNavigationItem
                 @Override
                 public void onFailure(Call<Events> call, Throwable t) {
                     progressDialog.dismiss();
-                    if (t != null)
-                        Log.e("semiu fetching error", t.getMessage());
-                    Helper.showToast("Failed to load the events. Please try again");
+                    fetchEvents();
                 }
             });
         } else {
@@ -131,8 +128,7 @@ public class EventActivity extends AppCompatActivity implements OnNavigationItem
     @NonNull
     private ProgressDialog showProgressDialog() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Loading Events");
-        progressDialog.setMessage("Please Wait...");
+        progressDialog.setMessage("Events Loading...");
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
         progressDialog.show();

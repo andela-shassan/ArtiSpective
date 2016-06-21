@@ -12,7 +12,7 @@
             android:id="@+id/exhibition_image"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:scaleType="centerCrop" />
+            android:scaleType="fitXY" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -25,6 +25,7 @@
                 style="@style/end_of_image_exists"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
                 android:ellipsize="end"
                 android:hint="@string/exhibition_title_hint"
                 android:maxLines="1"

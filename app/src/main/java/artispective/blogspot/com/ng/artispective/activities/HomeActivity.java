@@ -1,5 +1,7 @@
 package artispective.blogspot.com.ng.artispective.activities;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -8,21 +10,37 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
+import artispective.blogspot.com.ng.artispective.adapters.ArticleListAdapter;
 import artispective.blogspot.com.ng.artispective.interfaces.LogoutAuthentication;
+import artispective.blogspot.com.ng.artispective.models.article.GetArticles;
+import artispective.blogspot.com.ng.artispective.models.article.Post;
+import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
+import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
+import artispective.blogspot.com.ng.artispective.utils.Constants;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import artispective.blogspot.com.ng.artispective.utils.UserAuthentication;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener, LogoutAuthentication, AdapterView.OnItemClickListener {
 
     private NavigationView navigationView;
     private FloatingActionButton addArticleButton;
+    private ArrayList<Post> posts;
+    private ArticleListAdapter adapter;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +59,44 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         navigationView.setNavigationItemSelectedListener(this);
         setUpFAB();
         toggleLoginLogout();
+        fetchArticles();
+    }
+
+    private void setUpListView() {
+        adapter = new ArticleListAdapter(this, posts);
+        ListView listView = (ListView) findViewById(R.id.event_list_view);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(this);
+        listView.setDividerHeight(5);
+    }
+
+    private void fetchArticles() {
+        if (ConnectionChecker.isConnected()) {
+            showProgressDialog();
+            ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.GET_ALL_POST_URL)
+                    .getAllArticles().enqueue(new Callback<GetArticles>() {
+                @Override
+                public void onResponse(Call<GetArticles> call, Response<GetArticles> response) {
+                    int code = response.code();
+                    Log.d("semiu fetc art code ", code+"");
+                    if (code == 200) {
+                        posts = (ArrayList<Post>) response.body().getPosts();
+                        Helper.showToast(response.body().getPosts().size()+" ");
+                        setUpListView();
+                    } else {
+                        Helper.showToast("Something went wrong. Try again");
+                    }
+                    dismissProgressDialog();
+                }
+
+                @Override
+                public void onFailure(Call<GetArticles> call, Throwable t) {
+                    dismissProgressDialog();
+                }
+            });
+        } else {
+            ConnectionChecker.showNoNetwork();
+        }
     }
 
     @Override
@@ -69,7 +125,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            Helper.showToast("No Article yet");
+            fetchArticles();
             return true;
         }
 
@@ -152,6 +208,24 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Helper.showToast(posts.get(position).getHeading());
+        Intent intent = new Intent(this, DetailArticle.class);
+        intent.putExtra("position", position);
+        intent.putExtra("articles", posts);
+        startActivity(intent);
+    }
 
+    private void showProgressDialog() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
+    }
+
+    private void dismissProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 }
