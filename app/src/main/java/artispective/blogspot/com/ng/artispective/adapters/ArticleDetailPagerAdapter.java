@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -16,10 +18,9 @@ import java.util.ArrayList;
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.interfaces.CommentClickListener;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
+import artispective.blogspot.com.ng.artispective.models.article.PostComment;
+import artispective.blogspot.com.ng.artispective.utils.Helper;
 
-/**
- * Created by Nobest on 20/06/2016.
- */
 public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnClickListener,
         ViewPager.OnPageChangeListener {
     private Context context;
@@ -28,6 +29,7 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
     private ImageView imageView;
     private CommentClickListener commentClickListener;
     private int currentPosition;
+    private CommentAdapter commentAdapter;
 
     public ArticleDetailPagerAdapter(Context context, CommentClickListener commentClickListener,
                                      ArrayList<Post> posts) {
@@ -53,6 +55,8 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
         Post post = posts.get(position);
         TextView articleTitle, articleDetails, articleDate, articleComment, addComment;
         ImageView articleImage, articleCommentImage;
+        ListView listView;
+        android.support.v4.widget.NestedScrollView view;
 
         View convertView = layoutInflater.inflate(R.layout.content_detail_article, container, false);
 
@@ -63,13 +67,19 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
         articleImage = (ImageView) convertView.findViewById(R.id.post_image);
         addComment = (TextView) convertView.findViewById(R.id.add_comment_article);
         articleCommentImage = (ImageView) convertView.findViewById(R.id.article_comment_image);
+        listView = (ListView) convertView.findViewById(R.id.comment_list_view);
+//        view = (NestedScrollView) convertView.findViewById(R.id.header_view);
+//        listView.addHeaderView(view);
         articleCommentImage.setOnClickListener(this);
         addComment.setOnClickListener(this);
         articleComment.setOnClickListener(this);
         imageView = articleImage;
-
-        String[] dateArray = post.getDatePosted().split("-");
-        String date = dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
+        commentAdapter = new CommentAdapter(context, (ArrayList<PostComment>) post.getComments());
+        listView.setAdapter(commentAdapter);
+        listView.setDividerHeight(5);
+        updateListViewHeight(listView);
+        commentAdapter.notifyDataSetChanged();
+        String date = Helper.formatDate(post.getDatePosted());
 
         articleTitle.setText(post.getHeading());
         articleDetails.setText(post.getBody());
@@ -84,6 +94,12 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
 
         return convertView;
     }
+
+//    @NonNull
+//    private String formatDate(String dated) {
+//        String[] dateArray = dated.split("-");
+//        return dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
+//    }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
@@ -122,4 +138,26 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
     public void onPageScrollStateChanged(int state) {
 
     }
+
+    public static void updateListViewHeight(ListView myListView) {
+        ListAdapter myListAdapter = myListView.getAdapter();
+        if (myListAdapter == null) {
+            return;
+        }
+        //get listview height
+        int totalHeight = 0;
+        int adapterCount = myListAdapter.getCount();
+        for (int size = 0; size < adapterCount ; size++) {
+            View listItem = myListAdapter.getView(size, null, myListView);
+            listItem.measure(0, 0);
+//            listItem.getHeight();
+            totalHeight += (listItem.getMeasuredHeight() * 5);
+        }
+        //Change Height of ListView
+        ViewGroup.LayoutParams params = myListView.getLayoutParams();
+        params.height = totalHeight + (myListView.getDividerHeight() * (adapterCount - 1));
+        myListView.setLayoutParams(params);
+    }
+
+
 }

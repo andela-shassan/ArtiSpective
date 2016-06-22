@@ -159,4 +159,9 @@ public class Helper {
         }
         return bmpUri;
     }
+
+    public static String formatDate(String date) {
+        String[] dateArray = date.split("-");
+        return dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0]+"  ";
+    }
 }

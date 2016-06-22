@@ -116,7 +116,7 @@ public class Post implements Parcelable {
         dest.writeString(this.heading);
         dest.writeString(this.body);
         dest.writeString(this.id);
-        dest.writeList(this.comments);
+        dest.writeTypedList(comments);
         dest.writeString(this.source);
         dest.writeString(this.datePosted);
     }
@@ -127,13 +127,12 @@ public class Post implements Parcelable {
         this.heading = in.readString();
         this.body = in.readString();
         this.id = in.readString();
-        this.comments = new ArrayList<PostComment>();
-        in.readList(this.comments, List.class.getClassLoader());
+        this.comments = in.createTypedArrayList(PostComment.CREATOR);
         this.source = in.readString();
         this.datePosted = in.readString();
     }
 
-    public static final Parcelable.Creator<Post> CREATOR = new Parcelable.Creator<Post>() {
+    public static final Creator<Post> CREATOR = new Creator<Post>() {
         public Post createFromParcel(Parcel source) {
             return new Post(source);
         }

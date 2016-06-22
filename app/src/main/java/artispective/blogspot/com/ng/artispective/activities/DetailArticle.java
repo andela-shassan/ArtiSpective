@@ -2,18 +2,17 @@ package artispective.blogspot.com.ng.artispective.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
+import android.widget.ListView;
 
 import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.adapters.ArticleDetailPagerAdapter;
+import artispective.blogspot.com.ng.artispective.adapters.CommentAdapter;
 import artispective.blogspot.com.ng.artispective.interfaces.CommentClickListener;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
@@ -25,6 +24,8 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
     private ArrayList<Post> posts;
     private int currentPosition;
     private ViewPager viewPager;
+    private ListView listView;
+    private CommentAdapter commentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +43,6 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
         viewPager.setAdapter(pagerAdapter);
         viewPager.setCurrentItem(currentPosition);
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private void getEventsAndPosition() {
@@ -72,6 +64,9 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         Post post = posts.get(position);
         Log.d("semiu post scroll", post.getHeading() +" "+post.getId());
+//        listView = (ListView) findViewById(R.id.comment_list_view_home);
+//        commentAdapter = new CommentAdapter(this, (ArrayList<PostComment>) post.getComments());
+//        listView.setAdapter(commentAdapter);
     }
 
     @Override
@@ -89,5 +84,6 @@ public class DetailArticle extends AppCompatActivity implements ViewPager.OnPage
         Post post = posts.get(position);
         Log.d("semiu post clicked", post.getHeading() +" "+post.getId());
         Helper.showToast(post.getHeading() + " clicked");
+
     }
 }

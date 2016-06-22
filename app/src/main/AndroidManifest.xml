@@ -100,8 +100,7 @@
             android:name=".activities.HomeActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme" />
-        <activity android:name=".activities.CreateArticleActivity">
-        </activity>
+        <activity android:name=".activities.CreateArticleActivity"></activity>
         <activity
             android:name=".activities.DetailArticle"
             android:label="@string/title_activity_detail_article"
@@ -110,6 +109,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.HomeActivity" />
         </activity>
+        <activity
+            android:name=".nested.ScrollingActivity"
+            android:label="@string/title_activity_scrolling"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>
