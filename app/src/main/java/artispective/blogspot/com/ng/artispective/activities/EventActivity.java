@@ -36,12 +36,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static android.support.design.widget.NavigationView.OnNavigationItemSelectedListener;
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemLongClickListener;
 
 
-public class EventActivity extends AppCompatActivity implements OnNavigationItemSelectedListener,
+public class EventActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener,
         LogoutAuthentication, OnItemClickListener, OnItemLongClickListener {
 
     private ArrayList<Event> events;
@@ -113,7 +113,10 @@ public class EventActivity extends AppCompatActivity implements OnNavigationItem
                 @Override
                 public void onFailure(Call<Events> call, Throwable t) {
                     progressDialog.dismiss();
-                    fetchEvents();
+                    if (!hasTriedFetch) {
+                        hasTriedFetch = true;
+                        fetchEvents();
+                    }
                 }
             });
         } else {
@@ -137,6 +140,7 @@ public class EventActivity extends AppCompatActivity implements OnNavigationItem
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);

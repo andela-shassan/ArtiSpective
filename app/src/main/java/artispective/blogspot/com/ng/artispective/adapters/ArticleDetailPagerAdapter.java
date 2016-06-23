@@ -56,7 +56,6 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
         TextView articleTitle, articleDetails, articleDate, articleComment, addComment;
         ImageView articleImage, articleCommentImage;
         ListView listView;
-        android.support.v4.widget.NestedScrollView view;
 
         View convertView = layoutInflater.inflate(R.layout.content_detail_article, container, false);
 
@@ -68,8 +67,6 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
         addComment = (TextView) convertView.findViewById(R.id.add_comment_article);
         articleCommentImage = (ImageView) convertView.findViewById(R.id.article_comment_image);
         listView = (ListView) convertView.findViewById(R.id.comment_list_view);
-//        view = (NestedScrollView) convertView.findViewById(R.id.header_view);
-//        listView.addHeaderView(view);
         articleCommentImage.setOnClickListener(this);
         addComment.setOnClickListener(this);
         articleComment.setOnClickListener(this);
@@ -94,12 +91,6 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
 
         return convertView;
     }
-
-//    @NonNull
-//    private String formatDate(String dated) {
-//        String[] dateArray = dated.split("-");
-//        return dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
-//    }
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
@@ -150,7 +141,6 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
         for (int size = 0; size < adapterCount ; size++) {
             View listItem = myListAdapter.getView(size, null, myListView);
             listItem.measure(0, 0);
-//            listItem.getHeight();
             totalHeight += (listItem.getMeasuredHeight() * 5);
         }
         //Change Height of ListView

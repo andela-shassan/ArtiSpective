@@ -91,14 +91,17 @@ public interface ArtiSpectiveEndpoint {
 
     @Multipart
     @POST(Constants.ADD_POST_URL)
-    Call<ArticleResponse> addArticle(@Header("x-access-token") String token,@Part("userId") RequestBody userId,
-                                     @Part("heading") RequestBody heading, @Part("body") RequestBody body,
-                                     @Part("postImage\"; filename=\"postImage.png\" ") RequestBody image);
+    Call<ArticleResponse> addArticle(@Header("x-access-token") String token,
+                                     @Part("userId") RequestBody userId,
+                                     @Part("heading") RequestBody heading,
+                                     @Part("body") RequestBody body,
+                                     @Part("postImage\"; " +
+                                             "filename=\"postImage.png\" ") RequestBody image);
 
     @Multipart
     @PUT(Constants.UPDATE_POST_URL)
-    Call<BigEvent> updateAtricle(@Part("userId") RequestBody userId, @Part("postId") RequestBody postId,
-                              @Part("token") RequestBody token,
+    Call<BigEvent> updateAtricle(@Part("userId") RequestBody userId,
+                                 @Part("postId") RequestBody postId, @Part("token") RequestBody token,
                               @Part("heading") RequestBody heading, @Part("body") RequestBody body,
                               @Part("postImage\"; filename=\"postImage.png\" ") RequestBody image);
 
@@ -107,8 +110,14 @@ public interface ArtiSpectiveEndpoint {
 
     @FormUrlEncoded
     @POST(Constants.ADD_COMMENT_URL)
-    Call<DeleteEvent> addComment(@Field("token") String token, @Field("userId") String userId,
-                                  @Field("postId") String eventId, @Field("comment") String comment);
+    Call<ArticleResponse> addComment(@Field("token") String token, @Field("userId") String userId,
+                                  @Field("postId") String eventId, @Field("comment") String coment);
+
+    @FormUrlEncoded
+    @POST(Constants.REMOVE_POST_URL)
+    Call<ArticleResponse> removePost(@Field("token") String token, @Field("userId") String userId,
+                                     @Field("postId") String eventId);
+
 
     class Factory {
         private static ArtiSpectiveEndpoint artiSpectiveEndpoint;

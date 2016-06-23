@@ -202,5 +202,7 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="article_image">Article Image</string>
+    <string name="new_comment">New Comment</string>
+    <string name="post_comment">Post Comment</string>
 
 </resources>

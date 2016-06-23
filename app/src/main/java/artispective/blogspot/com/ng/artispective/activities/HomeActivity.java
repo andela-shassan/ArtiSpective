@@ -10,7 +10,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,7 +66,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         ListView listView = (ListView) findViewById(R.id.event_list_view);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(this);
-        listView.setDividerHeight(5);
+        listView.setDividerHeight(20);
     }
 
     private void fetchArticles() {
@@ -78,10 +77,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
                 @Override
                 public void onResponse(Call<GetArticles> call, Response<GetArticles> response) {
                     int code = response.code();
-                    Log.d("semiu fetc art code ", code+"");
                     if (code == 200) {
                         posts = (ArrayList<Post>) response.body().getPosts();
-                        Helper.showToast(response.body().getPosts().size()+" ");
                         setUpListView();
                     } else {
                         Helper.showToast("Something went wrong. Try again");
@@ -111,7 +108,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            Helper.launchHome(this);
         }
     }
 
@@ -208,7 +205,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Helper.showToast(posts.get(position).getHeading());
         Intent intent = new Intent(this, DetailArticle.class);
         intent.putExtra("position", position);
         intent.putExtra("articles", posts);
@@ -228,4 +224,5 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
             progressDialog.dismiss();
         }
     }
+
 }

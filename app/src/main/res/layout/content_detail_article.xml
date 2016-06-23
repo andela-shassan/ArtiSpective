@@ -3,12 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <!--android:orientation="vertical"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="artispective.blogspot.com.ng.artispective.activities.DetailArticle">
--->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -57,6 +56,17 @@
                         android:layout_marginStart="5dp"
                         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+                    <TextView
+                        android:id="@+id/article_posted_date"
+                        style="@style/end_of_image_exists"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_marginTop="5dp"
+                        android:gravity="end"
+                        android:hint="@string/exhibition_date"
+                        android:textStyle="italic" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -94,16 +104,6 @@
                         android:layout_marginLeft="5dp"
                         android:layout_marginStart="5dp"
                         android:text="@string/comment" />
-
-                    <TextView
-                        android:id="@+id/article_posted_date"
-                        style="@style/end_of_image_exists"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end|bottom"
-                        android:gravity="end"
-                        android:hint="@string/exhibition_date"
-                        android:textStyle="italic" />
 
                 </LinearLayout>
 

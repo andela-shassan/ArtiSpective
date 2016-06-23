@@ -164,4 +164,11 @@ public class Helper {
         String[] dateArray = date.split("-");
         return dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0]+"  ";
     }
+
+    public static void launchHome(Context context) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
 }
