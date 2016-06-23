@@ -77,7 +77,7 @@
                 android:value=".activities.HomeActivity" />
         </activity>
         <activity
-            android:name=".activities.DetailActivity"
+            android:name=".activities.DetailEvent"
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme">
             <meta-data

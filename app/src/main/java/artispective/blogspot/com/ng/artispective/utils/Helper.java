@@ -102,20 +102,29 @@ public class Helper {
         Toast.makeText(ContextProvider.getContext(), message, Toast.LENGTH_LONG).show();
     }
 
-    public static void addToCalendar(Context context, Event event) {
+    public static void addToCalendar(Context context, Event e) {
         Calendar beginTime = Calendar.getInstance();
-        beginTime.set(2012, 0, 19, 7, 30);
+        String date = e.getDate();
+        String[] dates = date.split("-");
+        int year = Integer.parseInt(dates[0]);
+        int month = Integer.parseInt(dates[1]) - 1;
+        int day = Integer.parseInt(dates[2].substring(0,2));
+        int hour = Integer.parseInt(dates[2].substring(3,5));
+        int minute = Integer.parseInt(dates[2].substring(6,8));
+        beginTime.set(year, month, day, hour, minute);
         Calendar endTime = Calendar.getInstance();
-        endTime.set(2012, 0, 19, 8, 30);
+        endTime.set(year, month, day, 22, 0);
+        String details;
+        details = (e.getDetails().length() < 100)? e.getDetails(): e.getDetails().substring(0,100);
         Intent intent = new Intent(Intent.ACTION_INSERT)
                 .setData(CalendarContract.Events.CONTENT_URI)
                 .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
                 .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
-                .putExtra(CalendarContract.Events.TITLE, event.getTitle())
-                .putExtra(CalendarContract.Events.DESCRIPTION, event.getDetails().substring(0, 100))
-                .putExtra(CalendarContract.Events.EVENT_LOCATION, event.getAddress())
-                .putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_BUSY)
-                .putExtra(Intent.EXTRA_EMAIL, "rowan@example.com,trevor@example.com");
+                .putExtra(CalendarContract.Events.TITLE, e.getTitle())
+                .putExtra(CalendarContract.Events.DESCRIPTION, details)
+                .putExtra(CalendarContract.Events.EVENT_LOCATION, e.getAddress())
+                .putExtra(CalendarContract.Events.ALLOWED_REMINDERS, CalendarContract.Events.MAX_REMINDERS)
+                .putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_FREE);
         context.startActivity(intent);
 
     }
@@ -123,7 +132,6 @@ public class Helper {
     public static void sendNote(Context context, Event event) {
         String u;
         u = (event.getImages().size() > 0)? event.getImages().get(0): Constants.DEFAULT_IMAGE;
-        String text = "Look at my awesome picture";
         Uri pictureUri = Uri.parse(u);
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
@@ -139,7 +147,7 @@ public class Helper {
     @Nullable
     public static Uri getLocalBitmapUri(Context context, ImageView imageView) {
         Drawable drawable = imageView.getDrawable();
-        Bitmap bmp = null;
+        Bitmap bmp;
         if (drawable instanceof BitmapDrawable){
             bmp = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
         } else {

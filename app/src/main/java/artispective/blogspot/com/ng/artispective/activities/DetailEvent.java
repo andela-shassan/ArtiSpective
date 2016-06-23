@@ -9,7 +9,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,7 +29,7 @@ import artispective.blogspot.com.ng.artispective.models.model.Event;
 import artispective.blogspot.com.ng.artispective.utils.Constants;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 
-public class DetailActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener,
+public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageChangeListener,
         AdapterView.OnItemSelectedListener {
     private ArrayList<Event> events;
     private int currentPosition;
@@ -72,7 +71,7 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
             @Override
             public void onClick(View v) {
                 event = events.get(viewPager.getCurrentItem());
-                Intent intent = new Intent(DetailActivity.this, CreateEventActivity.class);
+                Intent intent = new Intent(DetailEvent.this, CreateEventActivity.class);
                 intent.putExtra("event", event);
                 startActivity(intent);
             }
@@ -121,7 +120,6 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
            // shareEventOnFacebook();
         } else if (id == R.id.add_to_calendar) {
               Helper.addToCalendar(this, event);
-//            Helper.sendNote(this, event);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -181,10 +179,11 @@ public class DetailActivity extends AppCompatActivity implements ViewPager.OnPag
             shareActionProvider.setShareIntent(shareIntent);
     }
 
+
+    // For the share dropdown spinner in the toolbar
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         Toast.makeText(this, parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
-        Log.d("semiu Selected = ", parent.getItemAtPosition(position).toString());
     }
 
     @Override

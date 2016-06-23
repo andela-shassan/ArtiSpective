@@ -238,7 +238,7 @@ public class EventActivity extends AppCompatActivity implements
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent intent = new Intent(this, DetailActivity.class);
+        Intent intent = new Intent(this, DetailEvent.class);
         intent.putExtra("position", position);
         intent.putExtra("exhibitions", events);
         startActivity(intent);

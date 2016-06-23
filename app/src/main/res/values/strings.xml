@@ -10,6 +10,7 @@
     <string name="google_cloud_messaging_key">704818219857</string>
     <string name="facebook_app_id">873457016099545</string>
     <string name="title_activity_home">Home</string>
+    <string name="google_api_key">AIzaSyBJpYC2WXAPQyrhNrU08U-2RkbHayfhPWo</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

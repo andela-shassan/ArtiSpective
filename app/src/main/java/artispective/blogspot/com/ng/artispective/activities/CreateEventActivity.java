@@ -258,6 +258,12 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                             CreateEventActivity.this.finish();
                         } else {
                             Helper.showToast("Something went wrong");
+                            try {
+                                Log.v("semiu create msg", response.errorBody().string() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
                         }
                         dismissProgressDialog();
                     }
