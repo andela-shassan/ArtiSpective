@@ -9,6 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,6 +43,8 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
     private Button postComment;
     private String userId, userToken;
     private AlertDialog dialog;
+    private Post post;
+    private MenuItem item;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +74,28 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
             currentPosition = intent.getIntExtra("position", 0);
             posts = intent.getParcelableArrayListExtra("articles");
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.detail_article, menu);
+        item = menu.findItem(R.id.edit_article);
+        if (!Helper.getUserAdminStatus()) {
+            item.setVisible(false);
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.edit_article) {
+            post = posts.get(viewPager.getCurrentItem());
+            Intent intent = new Intent(this, CreateArticleActivity.class);
+            intent.putExtra("post", post);
+            startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -155,4 +181,5 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
         Helper.launchActivity(this, HomeActivity.class);
         finish();
     }
+
 }

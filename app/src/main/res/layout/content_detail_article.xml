@@ -103,7 +103,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="5dp"
                         android:layout_marginStart="5dp"
-                        android:text="@string/comment" />
+                        android:text="@string/comment"
+                        android:textColor="@color/colorPrimary"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textStyle="italic"/>
 
                 </LinearLayout>
 
@@ -114,6 +117,7 @@
             android:id="@+id/comment_list_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="10dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"

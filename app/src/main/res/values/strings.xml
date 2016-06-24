@@ -110,7 +110,7 @@
     </string-array>
     <string name="title_activity_detail_article">Article</string>
     <string name="article_title_hint">Article Title</string>
-    <string name="comment">Add Comment</string>
+    <string name="comment">Comment</string>
     <string name="comment_counter">0</string>
     <string name="title_activity_scrolling">ScrollingActivity</string>
     <string name="large_text">
@@ -206,5 +206,6 @@
     <string name="new_comment">New Comment</string>
     <string name="post_comment">Post Comment</string>
     <string name="event_time">07:00 AM</string>
+    <string name="update">Update</string>
 
 </resources>

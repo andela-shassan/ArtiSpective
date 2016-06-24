@@ -100,10 +100,16 @@ public interface ArtiSpectiveEndpoint {
 
     @Multipart
     @PUT(Constants.UPDATE_POST_URL)
-    Call<BigEvent> updateAtricle(@Part("userId") RequestBody userId,
-                                 @Part("postId") RequestBody postId, @Part("token") RequestBody token,
-                              @Part("heading") RequestBody heading, @Part("body") RequestBody body,
-                              @Part("postImage\"; filename=\"postImage.png\" ") RequestBody image);
+    Call<BigEvent> updateArticle(@Part("userId") RequestBody userId,
+                                 @Part("postId") String postId, @Part("token") String token,
+                                 @Part("heading") RequestBody heading, @Part("body") RequestBody body,
+                                 @Part("postImage\"; filename=\"postImage.png\" ") RequestBody image);
+
+    @Multipart
+    @PUT(Constants.UPDATE_POST_URL)
+    Call<BigEvent> updateArticle(@Part("userId") RequestBody userId,
+                                 @Part("postId") String postId, @Part("token") String token,
+                                 @Part("heading") RequestBody heading, @Part("body") RequestBody body);
 
     @GET(Constants.GET_ALL_POST_URL)
     Call<GetArticles> getAllArticles();
@@ -116,7 +122,7 @@ public interface ArtiSpectiveEndpoint {
     @FormUrlEncoded
     @POST(Constants.REMOVE_POST_URL)
     Call<ArticleResponse> removePost(@Field("token") String token, @Field("userId") String userId,
-                                     @Field("postId") String eventId);
+                                     @Field("postId") String postId);
 
 
     class Factory {

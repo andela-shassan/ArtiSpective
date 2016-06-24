@@ -16,7 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
@@ -183,7 +182,7 @@ public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageCh
     // For the share dropdown spinner in the toolbar
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(this, parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+        Helper.showToast(parent.getItemAtPosition(position).toString());
     }
 
     @Override

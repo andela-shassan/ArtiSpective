@@ -22,12 +22,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.article.ArticleResponse;
+import artispective.blogspot.com.ng.artispective.models.article.Post;
+import artispective.blogspot.com.ng.artispective.models.model.BigEvent;
 import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
 import artispective.blogspot.com.ng.artispective.utils.Constants;
@@ -56,6 +60,7 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
     private String placeholderPath;
     private String userId, userToken;
     private RequestBody usersId, usersToken, articlesTitle, articlesDetails, articlesImage;
+    private Post post;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +75,24 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setTitle("New Article");
+
+        getPostToEdit();
+    }
+
+    private void getPostToEdit() {
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("post")) {
+            post = intent.getParcelableExtra("post");
+            setTitle("Edit Article");
+            saveButton.setText(R.string.update);
+            setUpEditView(post);
+        }
+    }
+
+    private void setUpEditView(Post post) {
+        editTitle.setText(post.getHeading());
+        editDetails.setText(post.getBody());
+        Picasso.with(this).load(post.getImage()).into(articleImage);
     }
 
     private void findViews() {
@@ -143,10 +166,10 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
     private void attemptSaveArticle() {
         setErrorToNull();
         Helper.hideSoftKeyboard(this, saveButton);
-        if (file == null) {
+        /*if (file == null) {
             Helper.showToast("At least main image is required to post an event!");
             return;
-        }
+        }*/
         this.articleTitle = editTitle.getText().toString().trim();
         this.articleDetails = editDetails.getText().toString().trim();
 
@@ -175,8 +198,21 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
                 usersToken = RequestBody.create(MediaType.parse("text/plain"), this.userToken);
                 articlesTitle = RequestBody.create(MediaType.parse("text/plain"), this.articleTitle);
                 articlesDetails = RequestBody.create(MediaType.parse("text/plain"), this.articleDetails);
+                MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
+                if (file != null) {
+                    articlesImage = RequestBody.create(MEDIA_TYPE_PNG, file);
+                }
 
-                uploadArticle();
+                if (getTitle().toString().contains("New") ||
+                        saveButton.getText().toString().contains("Save")) {
+                    uploadNewArticle();
+
+                } else if (file == null) {
+                    uploadEditedArticleWithoutFile();
+                } else {
+                    uploadEditedArticleWithFile();
+                }
+
             } else {
                 ConnectionChecker.showNoNetwork();
             }
@@ -188,9 +224,7 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
         editDetails.setError(null);
     }
 
-    private void uploadArticle() {
-        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
-        articlesImage = RequestBody.create(MEDIA_TYPE_PNG, file);
+    private void uploadNewArticle() {
 
         ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_POST_URL)
                 .addArticle(userToken, usersId, articlesTitle, articlesDetails, articlesImage)
@@ -220,6 +254,58 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
                     }
                 });
 
+    }
+
+    private void uploadEditedArticleWithoutFile() {
+        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.UPDATE_POST_URL)
+            .updateArticle(usersId, post.getId(), userToken, articlesTitle, articlesDetails)
+            .enqueue(new Callback<BigEvent>() {
+                @Override
+                public void onResponse(Call<BigEvent> call, Response<BigEvent> r) {
+                    updateResponse(r);
+                }
+
+                @Override
+                public void onFailure(Call<BigEvent> call, Throwable t) {
+                    dismissProgressDialog();
+                    Helper.showToast("Failed to update the article");
+                }
+            });
+    }
+
+    private void uploadEditedArticleWithFile() {
+        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.UPDATE_POST_URL)
+                .updateArticle(usersId, post.getId(), userToken, articlesTitle,
+                        articlesDetails, articlesImage)
+                .enqueue(new Callback<BigEvent>() {
+                    @Override
+                    public void onResponse(Call<BigEvent> call, Response<BigEvent> r) {
+                        updateResponse(r);
+                    }
+
+                    @Override
+                    public void onFailure(Call<BigEvent> call, Throwable t) {
+                        dismissProgressDialog();
+                        Helper.showToast("Failed to update the article");
+                    }
+                });
+    }
+
+    private void updateResponse(Response<BigEvent> r) {
+        dismissProgressDialog();
+        int code = r.code();
+        Log.d("semiu update article", code+" ");
+        if (code == 200) {
+            Helper.showToast("Article Updated successfully");
+            Helper.launchActivity(CreateArticleActivity.this, HomeActivity.class);
+        } else {
+            Helper.showToast("Something went wrong. Try again");
+            try {
+                Log.d("semiu r.string ", r.errorBody().string());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 
