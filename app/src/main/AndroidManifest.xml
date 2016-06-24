@@ -54,10 +54,10 @@
             android:name=".activities.EventActivity"
             android:label="@string/events"
             android:theme="@style/AppTheme.NoActionBar">
-                <meta-data
-                    android:name="android.support.PARENT_ACTIVITY"
-                    android:value=".activities.HomeActivity"/>
-            </activity>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomeActivity" />
+        </activity>
         <activity
             android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login"
@@ -104,7 +104,11 @@
             android:name=".activities.HomeActivity"
             android:label="@string/title_activity_home"
             android:theme="@style/AppTheme" />
-        <activity android:name=".activities.CreateArticleActivity"/>
+        <activity android:name=".activities.CreateArticleActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomeActivity"/>
+        </activity>
         <activity
             android:name=".activities.DetailArticle"
             android:label="@string/title_activity_detail_article"
@@ -116,7 +120,8 @@
         <activity
             android:name=".nested.ScrollingActivity"
             android:label="@string/title_activity_scrolling"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>

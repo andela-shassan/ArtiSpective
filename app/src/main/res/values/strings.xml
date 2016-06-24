@@ -70,7 +70,7 @@
     <string name="clear_image">Clear image</string>
     <string name="use_phone_gallery">Choose from the gallery</string>
     <string name="event_name">Event Name</string>
-    <string name="event_date">Event Date (dd/mm/yyyy)</string>
+    <string name="event_date">dd/mm/yyyy</string>
     <string name="event_location">Event Location</string>
     <string name="event_details">Event Details</string>
     <string name="save_button_text">Save</string>
@@ -205,5 +205,6 @@
     <string name="article_image">Article Image</string>
     <string name="new_comment">New Comment</string>
     <string name="post_comment">Post Comment</string>
+    <string name="event_time">07:00 AM</string>
 
 </resources>

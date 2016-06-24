@@ -88,7 +88,7 @@ public class EventActivity extends AppCompatActivity implements
         listView.setAdapter(eventListAdapter);
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
-        listView.setDividerHeight(10);
+        listView.setDividerHeight(20);
     }
 
     private void fetchEvents() {
@@ -115,7 +115,7 @@ public class EventActivity extends AppCompatActivity implements
                     progressDialog.dismiss();
                     if (!hasTriedFetch) {
                         hasTriedFetch = true;
-                        fetchEvents();
+                        //fetchEvents();
                     }
                 }
             });
@@ -123,7 +123,7 @@ public class EventActivity extends AppCompatActivity implements
             ConnectionChecker.showNoNetwork();
             if (!hasTriedFetch) {
                 hasTriedFetch = true;
-                fetchEvents();
+               // fetchEvents();
             }
         }
     }

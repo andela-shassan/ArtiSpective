@@ -2,7 +2,9 @@ package artispective.blogspot.com.ng.artispective.activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -12,6 +14,7 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -19,8 +22,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TimePicker;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +37,8 @@ import artispective.blogspot.com.ng.artispective.models.model.Event;
 import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
 import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.CustomDatePicker;
+import artispective.blogspot.com.ng.artispective.utils.CustomTimePicker;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -39,12 +46,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CreateEventActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateEventActivity extends AppCompatActivity implements View.OnClickListener,
+        DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2324;
-    private EditText editName, editDate, editLocation, editDetail;
-    private String eventName, eventDate, eventLocation, eventDetail;
-    private ImageView eventImage, eventImage2, eventImage3;
+    private EditText editName, editDate, editTime, editLocation, editDetail;
+    private String eventName, eventDate, eventTime, eventLocation, eventDetail;
+    private ImageView eventImage, eventImage2, eventImage3, dateButton, timeButtom;
     private Button saveButton;
     private static final int SELECT_IMAGE_CODE = 1960;
     private static final int SELECT_IMAGE_CODE2 = 1961;
@@ -86,8 +94,10 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private void setUpEditView(Event event) {
         String[] dates = event.getDate().split("-");
         String date = dates[2].substring(0,2) + "/" + dates[1] + "/" + dates[0];
+        String time = dates[2].substring(3,8);
         editName.setText(event.getTitle());
         editDate.setText(date);
+        editTime.setText(time);
         editLocation.setText(event.getAddress());
         editDetail.setText(event.getDetails());
         saveButton.setText(R.string.update_event_button);
@@ -136,6 +146,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private void findViews() {
         editName = (EditText) findViewById(R.id.event_name);
         editDate = (EditText) findViewById(R.id.event_date);
+        editTime = (EditText) findViewById(R.id.event_time);
         editLocation = (EditText) findViewById(R.id.event_location);
         editDetail = (EditText) findViewById(R.id.event_additional_details);
         saveButton = (Button) findViewById(R.id.save_button);
@@ -150,6 +161,12 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         eventImage3 = (ImageView) findViewById(R.id.event_banner3);
         assert eventImage3 != null;
         eventImage3.setOnClickListener(this);
+        dateButton = (ImageView) findViewById(R.id.date_button);
+        assert dateButton != null;
+        dateButton.setOnClickListener(this);
+        timeButtom = (ImageView) findViewById(R.id.time_button);
+        assert timeButtom != null;
+        timeButtom.setOnClickListener(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -163,11 +180,16 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         }
         this.eventName = editName.getText().toString().trim();
         this.eventDate = editDate.getText().toString().trim();
+        this.eventTime = editTime.getText().toString().trim();
         this.eventLocation = editLocation.getText().toString().trim();
         this.eventDetail = editDetail.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
+
+        if (TextUtils.isEmpty(eventTime)) {
+            this.eventTime = "07:00";
+        }
 
         if (TextUtils.isEmpty(eventName)) {
             this.editName.setError(getString(R.string.error_empty_event_name));
@@ -208,7 +230,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                 setProgressDialog();
 
                 String[] dateArray = eventDate.split("/");
-                String date = dateArray[1] + "/" + dateArray[0] + "/" + dateArray[2];
+                String date = dateArray[1]+ "/" + dateArray[0] + "/" + dateArray[2] +"T"+eventTime;
 
                 if (event != null) {
                     eventId = RequestBody.create(MediaType.parse("text/plain"), event.getId());
@@ -366,6 +388,14 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
             case R.id.event_banner3:
                 openGallery(SELECT_IMAGE_CODE3);
                 break;
+            case R.id.date_button:
+                DialogFragment dialog = new CustomDatePicker();
+                dialog.show(getSupportFragmentManager(), "date_picker");
+                break;
+            case R.id.time_button:
+                DialogFragment fragment = new CustomTimePicker();
+                fragment.show(getSupportFragmentManager(), "time_picker");
+                break;
             default:
                 break;
         }
@@ -445,4 +475,20 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     }
 
 
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        int month = 1 + monthOfYear;
+        String day = (dayOfMonth < 10) ? "0" + dayOfMonth : dayOfMonth +"";
+        String mth = (month < 10) ? "0" + month : month + "";
+        editDate.setText(String.format("%s/%s/%s", day, mth, year));
+    }
+
+    @Override
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        Log.w("semiu time", hourOfDay + " "+ minute);
+        String min = (minute < 10) ? "0" + minute : minute + "";
+        String hour = (hourOfDay < 10) ? "0" + hourOfDay : hourOfDay + "";
+        String period = (hourOfDay < 12) ? "AM" : "PM";
+        editTime.setText(String.format("%s:%s", hour, min));
+    }
 }
