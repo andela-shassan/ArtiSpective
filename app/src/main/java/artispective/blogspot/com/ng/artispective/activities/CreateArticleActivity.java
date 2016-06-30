@@ -31,16 +31,15 @@ import java.io.IOException;
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.article.ArticleResponse;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
-import artispective.blogspot.com.ng.artispective.models.model.BigEvent;
-import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Endpoint;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 
 public class CreateArticleActivity extends AppCompatActivity implements View.OnClickListener {
@@ -59,8 +58,9 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
     private String filePath, filePath2, filePath3;
     private String placeholderPath;
     private String userId, userToken;
-    private RequestBody usersId, usersToken, articlesTitle, articlesDetails, articlesImage;
+    private RequestBody usersId, usersToken, asTitle, asDetails, articlesImage;
     private Post post;
+    private RequestBody postId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,10 +166,7 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
     private void attemptSaveArticle() {
         setErrorToNull();
         Helper.hideSoftKeyboard(this, saveButton);
-        /*if (file == null) {
-            Helper.showToast("At least main image is required to post an event!");
-            return;
-        }*/
+
         this.articleTitle = editTitle.getText().toString().trim();
         this.articleDetails = editDetails.getText().toString().trim();
 
@@ -196,21 +193,22 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
 
                 usersId = RequestBody.create(MediaType.parse("text/plain"), this.userId);
                 usersToken = RequestBody.create(MediaType.parse("text/plain"), this.userToken);
-                articlesTitle = RequestBody.create(MediaType.parse("text/plain"), this.articleTitle);
-                articlesDetails = RequestBody.create(MediaType.parse("text/plain"), this.articleDetails);
+                asTitle = RequestBody.create(MediaType.parse("text/plain"), this.articleTitle);
+                asDetails = RequestBody.create(MediaType.parse("text/plain"), this.articleDetails);
                 MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
                 if (file != null) {
                     articlesImage = RequestBody.create(MEDIA_TYPE_PNG, file);
+                }
+                if (post != null) {
+                    postId = RequestBody.create(MediaType.parse("text/plain"), post.getId());
                 }
 
                 if (getTitle().toString().contains("New") ||
                         saveButton.getText().toString().contains("Save")) {
                     uploadNewArticle();
 
-                } else if (file == null) {
-                    uploadEditedArticleWithoutFile();
                 } else {
-                    uploadEditedArticleWithFile();
+                    uploadEditedArticleWithoutFile();
                 }
 
             } else {
@@ -225,87 +223,86 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
     }
 
     private void uploadNewArticle() {
-
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_POST_URL)
-                .addArticle(userToken, usersId, articlesTitle, articlesDetails, articlesImage)
-                .enqueue(new Callback<ArticleResponse>() {
+        Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
+                .rxAddArticle(userToken, usersId, asTitle, asDetails, articlesImage);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<ArticleResponse>() {
                     @Override
-                    public void onResponse(Call<ArticleResponse> c, Response<ArticleResponse> r) {
+                    public void onCompleted() {
                         dismissProgressDialog();
-                        int code = r.code();
-                        Log.d("semiu code article", code+" ");
-                        if (code == 200) {
-                            Helper.showToast("Article added successfully");
-                            Helper.launchActivity(CreateArticleActivity.this, HomeActivity.class);
-                        } else {
-                            Helper.showToast("Something went wrong. Try again");
-                        }
-                        if (r.body() != null) {
-                            Log.d("semiu body", r.message());
-                        } else {
-                            Log.d("semiu errorBody", r.errorBody().toString());
-                        }
+                        Helper.launchActivity(CreateArticleActivity.this, HomeActivity.class);
+                        Helper.showToast("Article added successfully");
                     }
 
                     @Override
-                    public void onFailure(Call<ArticleResponse> call, Throwable t) {
+                    public void onError(Throwable e) {
                         dismissProgressDialog();
-                        Helper.showToast("Failed to post article");
+                        Log.e("semiu upload article", e.getMessage());
+                        Helper.showToast("Something went wrong. Try again");
+                    }
+
+                    @Override
+                    public void onNext(ArticleResponse articleResponse) {
+
                     }
                 });
-
     }
 
     private void uploadEditedArticleWithoutFile() {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.UPDATE_POST_URL)
-            .updateArticle(usersId, post.getId(), userToken, articlesTitle, articlesDetails)
-            .enqueue(new Callback<BigEvent>() {
-                @Override
-                public void onResponse(Call<BigEvent> call, Response<BigEvent> r) {
-                    updateResponse(r);
-                }
-
-                @Override
-                public void onFailure(Call<BigEvent> call, Throwable t) {
-                    dismissProgressDialog();
-                    Helper.showToast("Failed to update the article");
-                }
-            });
-    }
-
-    private void uploadEditedArticleWithFile() {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.UPDATE_POST_URL)
-                .updateArticle(usersId, post.getId(), userToken, articlesTitle,
-                        articlesDetails, articlesImage)
-                .enqueue(new Callback<BigEvent>() {
+        Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
+                .rxUpdateArticle(userToken, userId, post.getId(), articleTitle, articleDetails);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<ArticleResponse>() {
                     @Override
-                    public void onResponse(Call<BigEvent> call, Response<BigEvent> r) {
-                        updateResponse(r);
+                    public void onCompleted() {
+                        updateResponse();
                     }
 
                     @Override
-                    public void onFailure(Call<BigEvent> call, Throwable t) {
+                    public void onError(Throwable e) {
                         dismissProgressDialog();
-                        Helper.showToast("Failed to update the article");
+                        Helper.showToast("Something went wrong. Try again");
+                        Log.e("semiu up woI", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(ArticleResponse articleResponse) {
+
                     }
                 });
     }
 
-    private void updateResponse(Response<BigEvent> r) {
+    private void uploadEditedArticleWithFile() {
+        Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
+                .rxUpdateArticle(userToken, usersId, postId, asTitle, asDetails, articlesImage);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<ArticleResponse>() {
+                    @Override
+                    public void onCompleted() {
+                        updateResponse();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        dismissProgressDialog();
+                        Helper.showToast("Something went wrong. Try again");
+                        Log.e("semiu up wI", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(ArticleResponse articleResponse) {
+
+                    }
+                });
+    }
+
+    private void updateResponse() {
         dismissProgressDialog();
-        int code = r.code();
-        Log.d("semiu update article", code+" ");
-        if (code == 200) {
-            Helper.showToast("Article Updated successfully");
-            Helper.launchActivity(CreateArticleActivity.this, HomeActivity.class);
-        } else {
-            Helper.showToast("Something went wrong. Try again");
-            try {
-                Log.d("semiu r.string ", r.errorBody().string());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Helper.showToast("Article Updated successfully");
+        Helper.launchActivity(CreateArticleActivity.this, HomeActivity.class);
     }
 
 
@@ -332,13 +329,13 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
                  file = new File(filePath);
                 break;
             case SELECT_IMAGE_CODE2:
-//                setBitmapToImageView(resultCode, data, eventImage2);
+//                setBitmapToImageView(resultCode, data, articleImage2);
                 bitmap2 = placeHolderBitmap;
                 filePath2 = placeholderPath;
                 file2 = new File(filePath2);
                 break;
             case SELECT_IMAGE_CODE3:
-//                setBitmapToImageView(resultCode, data, eventImage3);
+//                setBitmapToImageView(resultCode, data, articleImage3);
                 bitmap3 = placeHolderBitmap;
                 filePath3 = placeholderPath;
                 file3 = new File(filePath3);
@@ -371,7 +368,6 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Event " + articleTitle + " is being created");
-        progressDialog.setTitle("Uploading Data");
         progressDialog.show();
     }
 
@@ -381,4 +377,15 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        clearForm();
+        super.onDestroy();
+    }
+
+    private void clearForm() {
+        editTitle.setText(null);
+        editDetails.setText(null);
+        articleImage.setImageDrawable(null);
+    }
 }

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
+import artispective.blogspot.com.ng.artispective.utils.Helper;
 
 /**
  * Created by Nobest on 20/06/2016.
@@ -29,8 +30,7 @@ public class ArticleListAdapter extends ArrayAdapter<Post> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         Post post = posts.get(position);
-        String[] dateArray = post.getDatePosted().split("-");
-        String date = dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
+        String date = Helper.formatDateTime(post.getDatePosted());
         ViewHolder viewHolder;
 
         if (convertView == null) {

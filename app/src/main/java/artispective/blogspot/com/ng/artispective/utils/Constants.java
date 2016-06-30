@@ -16,8 +16,8 @@ public class Constants {
     public static final String UPDATE_POST_URL = "http://artispective.herokuapp.com/api/v1/updatePost/";
     public static final String REMOVE_POST_URL = "http://artispective.herokuapp.com/api/v1/removePost/";
     public static final String GET_ALL_POST_URL = "http://artispective.herokuapp.com/api/v1/getAllPosts/";
-    public static final String GET_ONE_POST_URL = "http://artispective.herokuapp.com/api/v1/getOnePost/";
     public static final String ADD_COMMENT_URL = "http://artispective.herokuapp.com/api/v1/addComment/";
+    public static final String GET_ONE_POST_URL = "http://artispective.herokuapp.com/api/v1/getOnePost/";
     public static final String DELETE_COMMENT_URL = "http://artispective.herokuapp.com/api/v1/editComment/";
     public static final String EDIT_COMMENT_URL = "http://artispective.herokuapp.com/api/v1/deleteComment/";
 

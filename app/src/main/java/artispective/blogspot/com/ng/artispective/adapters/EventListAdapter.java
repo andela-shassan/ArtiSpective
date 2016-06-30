@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
 import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Helper;
 
 public class EventListAdapter extends ArrayAdapter<Event> {
 
@@ -38,12 +39,11 @@ public class EventListAdapter extends ArrayAdapter<Event> {
 
         viewHolder.exhibition_title.setText(event.getTitle());
         viewHolder.exhibition_content.setText(event.getDetails());
-        String[] dateArray = event.getDate().split("-");
-        String date = dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
+        String date = Helper.formatDateTime(event.getDate());
         viewHolder.exhibition_date.setText(date);
         viewHolder.exhibition_location.setText(event.getAddress());
 
-        String img = "";
+        String img;
         img = (event.getImages().size() > 0) ? event.getImages().get(0) : Constants.DEFAULT_IMAGE;
 
         Picasso.with(getContext()).load(img)

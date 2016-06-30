@@ -40,7 +40,7 @@ public class CommentAdapter extends ArrayAdapter<PostComment> {
                 + postComment.getUser().getLastName();
         viewHolder.comment_owner.setText(userName);
         viewHolder.comment_body.setText(postComment.getComment());
-        viewHolder.comment_time.setText(Helper.formatDate(postComment.getDate()));
+        viewHolder.comment_time.setText(Helper.formatDateTime(postComment.getDate()));
 
         return convertView;
     }

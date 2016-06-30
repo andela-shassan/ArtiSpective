@@ -6,4 +6,5 @@
     <color name="textColor">#FFFFFF</color>
     <color name="articleList">#332E28</color>
     <color name="dark_background">#323232</color>
+    <color name="darker_background">#191919</color>
 </resources>

@@ -8,6 +8,8 @@
     <string name="app_secret_key">170F231E-8AC5-1E7C-FF18-F14172A62C00</string>
     <string name="app_id">A9055167-61DE-81A4-FF76-A84111205300</string>
     <string name="google_cloud_messaging_key">704818219857</string>
+    <string name="twitter_consumer_key">6D9DoInATFI1djYGcao1rENjT</string>
+    <string name="twitter_consumer_secret">FT5UwGjwRKbfakvAYfoPqyA1J6CA7OTJ9tewDZKQVtbm2kEvCw</string>
     <string name="facebook_app_id">873457016099545</string>
     <string name="title_activity_home">Home</string>
     <string name="google_api_key">AIzaSyBJpYC2WXAPQyrhNrU08U-2RkbHayfhPWo</string>
@@ -207,5 +209,8 @@
     <string name="post_comment">Post Comment</string>
     <string name="event_time">07:00 AM</string>
     <string name="update">Update</string>
+    <string name="refresh">Refresh</string>
+    <string name="no_data_note">Check your network and then refresh.</string>
+    <string name="share_via">Share Via...</string>
 
 </resources>

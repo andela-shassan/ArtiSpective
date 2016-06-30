@@ -1,35 +1,35 @@
 package artispective.blogspot.com.ng.artispective.activities;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.Spinner;
 
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.adapters.DetailPagerAdapter;
+import artispective.blogspot.com.ng.artispective.interfaces.ShareItemClickListener;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
 import artispective.blogspot.com.ng.artispective.utils.Constants;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
+import artispective.blogspot.com.ng.artispective.utils.ShareSheet;
 
 public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageChangeListener,
-        AdapterView.OnItemSelectedListener {
+        ShareItemClickListener {
     private ArrayList<Event> events;
     private int currentPosition;
     private ShareDialog shareDialog;
@@ -38,9 +38,8 @@ public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageCh
     private ViewPager viewPager;
     private String userId;
     private FloatingActionButton floatingActionButton;
-    private ShareActionProvider shareActionProvider;
-    private Intent shareIntent;
     private Toolbar toolbar;
+    private ShareSheet shareSheet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,20 +93,6 @@ public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageCh
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail_activity_menu, menu);
-        MenuItem item = menu.findItem(R.id.share_event);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
-
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.share_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
-
-        shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-
-        prepareShareIntent(detailPagerAdapter.getImageView());
-        attachShareIntentAction();
         return true;
     }
 
@@ -115,29 +100,13 @@ public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageCh
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         event = events.get(viewPager.getCurrentItem());
-        if (id == R.id.share_event) {
-           // shareEventOnFacebook();
-        } else if (id == R.id.add_to_calendar) {
-              Helper.addToCalendar(this, event);
+        if (id == R.id.add_to_calendar) {
+            Helper.addToCalendar(this, event);
+        } else if (id == R.id.share_event) {
+            shareSheet = new ShareSheet(this, this);
+            shareSheet.show();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    // The app store link should be set as the contentUrl
-    private void shareEventOnFacebook() {
-        if (ShareDialog.canShow(ShareLinkContent.class)) {
-            event = events.get(viewPager.getCurrentItem());
-            String u;
-            u = (event.getImages().size() > 0)? event.getImages().get(0): Constants.DEFAULT_IMAGE;
-
-            ShareLinkContent content = new ShareLinkContent.Builder()
-                    .setContentUrl(Uri.parse("http://artispective.blogspot.com.ng/"))
-                    .setContentTitle(event.getTitle())
-                    .setContentDescription(event.getDetails())
-                    .setImageUrl(Uri.parse(u))
-                    .build();
-            shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
-        }
     }
 
     @Override
@@ -159,34 +128,114 @@ public class DetailEvent extends AppCompatActivity implements ViewPager.OnPageCh
 
     }
 
+    private void shareEventOnFacebook() {
+        if (ShareDialog.canShow(ShareLinkContent.class)) {
+            event = events.get(viewPager.getCurrentItem());
+            String u;
+            u = (event.getImages().size() > 0)? event.getImages().get(0): Constants.DEFAULT_IMAGE;
+
+            ShareLinkContent content = new ShareLinkContent.Builder()
+                    .setContentUrl(Uri.parse("http://artispective.blogspot.com.ng/"))
+                    .setContentTitle(event.getTitle())
+                    .setContentDescription(event.getDetails())
+                    .setImageUrl(Uri.parse(u))
+                    .build();
+            shareDialog.show(content, ShareDialog.Mode.AUTOMATIC);
+        }
+    }
+
+    private void shareOnTwitter() {
+        event = events.get(viewPager.getCurrentItem());
+        Intent shareIntent = findTwitterClient();
+        if (shareIntent == null) {
+            Helper.showToast("Twitter application not installed");
+            return;
+        }
+        shareIntent.putExtra(Intent.EXTRA_TEXT, event.getTitle()+"\n"
+                +event.getDetails() +"\n" + "http://artispective.blogspot.com.ng/");
+        startActivity(Intent.createChooser(shareIntent, "Share"));
+
+    }
+
+    private void shareOnGooglePlus() {
+        event = events.get(viewPager.getCurrentItem());
+        Intent googleShare = findGooglePlusClient();
+        if (googleShare == null) {
+            Helper.showToast("Google+ application not installed");
+            return;
+        }
+        googleShare.putExtra(Intent.EXTRA_TEXT, event.getDetails());
+        googleShare.putExtra(Intent.EXTRA_TITLE, event.getTitle());
+        startActivity(Intent.createChooser(googleShare, "Share"));
+    }
+
+
+    public Intent findTwitterClient() {
+        final String[] twitterApps = {"com.twitter.android", "com.twidroid",
+                "com.handmark.tweetcaster", "com.thedeck.android" };
+
+        Intent tweetIntent = new Intent();
+        tweetIntent.setType("text/plain");
+        final PackageManager packageManager = getPackageManager();
+        List<ResolveInfo> list = packageManager.queryIntentActivities(
+                tweetIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+        for (int i = 0; i < twitterApps.length; i++) {
+            for (ResolveInfo resolveInfo : list) {
+                String p = resolveInfo.activityInfo.packageName;
+                Log.e("semiu package", p);
+                if (p != null && p.startsWith(twitterApps[i])) {
+                    tweetIntent.setPackage(p);
+                    return tweetIntent;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Intent findGooglePlusClient() {
+        final String googlePlus = "com.google.android.apps.plus";
+
+        Intent googlePIntent = new Intent();
+        googlePIntent.setType("text/plain");
+        final PackageManager packageManager = getPackageManager();
+        List<ResolveInfo> list = packageManager.queryIntentActivities(
+                googlePIntent, PackageManager.MATCH_DEFAULT_ONLY);
+
+            for (ResolveInfo resolveInfo : list) {
+                String p = resolveInfo.activityInfo.packageName;
+                Log.e("semiu package G+ ", p);
+                if (p.startsWith(googlePlus)) {
+                    googlePIntent.setPackage(p);
+                    return googlePIntent;
+                }
+            }
+
+        return null;
+    }
+
+    @Override
+    public void onFacebookClicked() {
+        shareEventOnFacebook();
+    }
+
+
+    @Override
+    public void onTwitterClicked() {
+        shareOnTwitter();
+    }
+
+    @Override
+    public void onGooglePlusClicked() {
+        shareOnGooglePlus();
+    }
+
     @Override
     protected void onDestroy() {
         viewPager.removeOnPageChangeListener(this);
+        detailPagerAdapter.finishUpdate(null);
+        detailPagerAdapter = null;
         super.onDestroy();
-    }
-
-    public void prepareShareIntent(ImageView ivImage) {
-        Uri bmpUri = Helper.getLocalBitmapUri(this,ivImage);
-        shareIntent = new Intent();
-        shareIntent.setAction(Intent.ACTION_SEND);
-        shareIntent.putExtra(Intent.EXTRA_STREAM, bmpUri);
-        shareIntent.setType("image/*");
-    }
-
-    public void attachShareIntentAction() {
-        if (shareActionProvider != null && shareIntent != null)
-            shareActionProvider.setShareIntent(shareIntent);
-    }
-
-
-    // For the share dropdown spinner in the toolbar
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Helper.showToast(parent.getItemAtPosition(position).toString());
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
     }
 }

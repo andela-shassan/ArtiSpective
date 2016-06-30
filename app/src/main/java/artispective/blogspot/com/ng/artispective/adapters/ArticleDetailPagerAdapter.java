@@ -76,7 +76,7 @@ public class ArticleDetailPagerAdapter extends PagerAdapter implements View.OnCl
         listView.setDividerHeight(5);
         updateListViewHeight(listView);
         commentAdapter.notifyDataSetChanged();
-        String date = Helper.formatDate(post.getDatePosted());
+        String date = Helper.formatDateTime(post.getDatePosted());
 
         articleTitle.setText(post.getHeading());
         articleDetails.setText(post.getBody());
