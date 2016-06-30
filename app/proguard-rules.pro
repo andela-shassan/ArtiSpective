@@ -25,11 +25,20 @@
     public static int e(...);
 }
 
+# Retrofit2
 -dontwarn retrofit2.**
 -keep class retrofit2.** { *; }
 -keepattributes Signature
 -keepattributes Exceptions
 
+# Retrofit
+-dontwarn retrofit.**
+-keep class retrofit.** { *; }
+-keepattributes Signature
+-keepattributes Exceptions
+
+
+# RxJava RxAndroid
 -keep class rx.schedulers.Schedulers {
     public static <methods>;
 }
@@ -50,3 +59,38 @@
     long producerNode;
     long consumerNode;
 }
+
+
+#Okhttp
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class com.squareup.okhttp.** { *; }
+-keep interface com.squareup.okhttp.** { *; }
+-dontwarn com.squareup.okhttp.**
+
+# Okio
+-keep class sun.misc.Unsafe { *; }
+-dontwarn java.nio.file.*
+-dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
+
+#Gson Library
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.stream.** { *; }
+
+#Parcelable
+-keep class * implements android.os.Parcelable {
+  public static final android.os.Parcelable$Creator *;
+}
+-keep class org.parceler.Parceler$$Parcels
+
+-keep class artispective.blogspot.com.ng.artispective.utils.Endpoint.* {
+  public protected *;
+  public static <methods>;
+  public <methods>;
+}
+
+-keep public class artispective.blogspot.com.ng.artispective.utils.** {*;}
+
+-keep public interface artispective.blogspot.com.ng.artispective.utils$Endpoint {*;}
+
+
