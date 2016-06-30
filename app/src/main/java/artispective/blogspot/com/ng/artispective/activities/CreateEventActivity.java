@@ -255,9 +255,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
                     } else {
                         uploadEventFile1();
                     }
-                } else if (file != null) {
-                    updateEvent(file);
-                } else if (file == null) {
+                } else {
                     updateEvent();
                 }
 

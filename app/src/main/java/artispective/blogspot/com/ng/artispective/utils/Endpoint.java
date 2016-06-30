@@ -317,7 +317,7 @@ public interface Endpoint {
                         , SIZE_OF_CACHE);
                 OkHttpClient.Builder client = new OkHttpClient().newBuilder();
                 client.cache(c);
-                //client.networkInterceptors().add(new CacheControlInterceptor());
+                client.networkInterceptors().add(new CacheControlInterceptor());
                 RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory
                         .createWithScheduler(Schedulers.newThread());
 

@@ -207,10 +207,8 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
                         saveButton.getText().toString().contains("Save")) {
                     uploadNewArticle();
 
-                } else if (file == null) {
-                    uploadEditedArticleWithoutFile();
                 } else {
-                    uploadEditedArticleWithFile();
+                    uploadEditedArticleWithoutFile();
                 }
 
             } else {
@@ -223,37 +221,6 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
         editTitle.setError(null);
         editDetails.setError(null);
     }
-
-//    private void uploadNewArticle() {
-//        Endpoint.Factory.getEndpoint(Constants.ADD_POST_URL)
-//                .addArticle(userToken, usersId, asTitle, asDetails, articlesImage)
-//                .enqueue(new Callback<ArticleResponse>() {
-//                    @Override
-//                    public void onResponse(Call<ArticleResponse> c, Response<ArticleResponse> r) {
-//                        dismissProgressDialog();
-//                        int code = r.code();
-//                        Log.d("semiu code article", code+" ");
-//                        if (code == 200) {
-//                            Helper.showToast("Article added successfully");
-//                            Helper.launchActivity(CreateArticleActivity.this, HomeActivity.class);
-//                        } else {
-//                            Helper.showToast("Something went wrong. Try again");
-//                        }
-//                        if (r.body() != null) {
-//                            Log.d("semiu body", r.message());
-//                        } else {
-//                            Log.d("semiu errorBody", r.errorBody().toString());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<ArticleResponse> call, Throwable t) {
-//                        dismissProgressDialog();
-//                        Helper.showToast("Failed to post article");
-//                    }
-//                });
-//
-//    }
 
     private void uploadNewArticle() {
         Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
@@ -282,28 +249,6 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
                 });
     }
 
-//    private void uploadEditedArticleWithoutFile() {
-//        Log.d("semiu update ", "updating without image");
-//        Log.d("semiu post ", post.getId());
-//        Log.d("semiu post ", userId);
-//        Log.d("semiu post ", userToken);
-//
-//        Endpoint.Factory.getEndpoint(Constants.UPDATE_POST_URL)
-//            .updateArticle(userToken, userId, post.getId(), articleTitle, articleDetails)
-//            .enqueue(new Callback<ArticleResponse>() {
-//                @Override
-//                public void onResponse(Call<ArticleResponse> call, Response<ArticleResponse> r) {
-//                    updateResponse();
-//                }
-//
-//                @Override
-//                public void onFailure(Call<ArticleResponse> call, Throwable t) {
-//                    dismissProgressDialog();
-//                    Helper.showToast("Failed to update the article");
-//                }
-//            });
-//    }
-
     private void uploadEditedArticleWithoutFile() {
         Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
                 .rxUpdateArticle(userToken, userId, post.getId(), articleTitle, articleDetails);
@@ -328,25 +273,6 @@ public class CreateArticleActivity extends AppCompatActivity implements View.OnC
                     }
                 });
     }
-
-//    private void uploadEditedArticleWithFile() {
-//        Log.d("semiu update ", "updating with image");
-//        Endpoint.Factory.getEndpoint(Constants.UPDATE_POST_URL)
-//            .updateArticle(userToken, usersId, postId, asTitle,
-//                    asDetails, articlesImage)
-//            .enqueue(new Callback<ArticleResponse>() {
-//                @Override
-//                public void onResponse(Call<ArticleResponse> call, Response<ArticleResponse> r) {
-//                    updateResponse();
-//                }
-//
-//                @Override
-//                public void onFailure(Call<ArticleResponse> call, Throwable t) {
-//                    dismissProgressDialog();
-//                    Helper.showToast("Failed to update the article");
-//                }
-//            });
-//    }
 
     private void uploadEditedArticleWithFile() {
         Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()

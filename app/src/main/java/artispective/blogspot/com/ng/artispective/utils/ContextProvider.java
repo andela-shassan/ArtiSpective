@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 
 import com.facebook.FacebookSdk;
-import com.squareup.leakcanary.LeakCanary;
 
 public class ContextProvider extends Application {
     private static Context context;
@@ -14,7 +13,6 @@ public class ContextProvider extends Application {
         super.onCreate();
         context = getApplicationContext();
         FacebookSdk.sdkInitialize(context);
-        LeakCanary.install((Application) context);
     }
 
     public static Context getContext() {
