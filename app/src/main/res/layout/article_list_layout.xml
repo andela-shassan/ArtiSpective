@@ -3,27 +3,32 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/articleList"
         android:orientation="horizontal">
 
         <ImageView
-            android:id="@+id/exhibition_image"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:scaleType="centerCrop" />
+            android:id="@+id/article_image"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:scaleType="fitXY" />
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="100dp"
+            android:layout_gravity="center|bottom"
+            android:background="@color/cardview_dark_background"
             android:paddingBottom="5dp">
 
             <TextView
-                android:id="@+id/exhibition_title"
+                android:id="@+id/article_title"
                 style="@style/end_of_image_exists"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:layout_centerHorizontal="true"
                 android:ellipsize="end"
                 android:hint="@string/exhibition_title_hint"
                 android:maxLines="1"
@@ -32,26 +37,42 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/exhibition_content"
+                android:id="@+id/article_details"
                 style="@style/end_of_image_exists"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/exhibition_title"
+                android:layout_below="@id/article_title"
                 android:ellipsize="end"
                 android:hint="@string/exhibition_details"
                 android:maxLines="2" />
 
-            <TextView
-                android:id="@+id/exhibition_location"
-                style="@style/end_of_image_exists"
+            <ImageView
+                android:id="@+id/article_comment_image_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start|bottom"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
                 android:layout_alignParentBottom="true"
-                android:hint="@string/exhibition_location"
-                android:textStyle="bold" />
+                android:contentDescription="@string/article_cpmment"
+                android:src="@drawable/comments"
+                />
 
             <TextView
-                android:id="@+id/exhibition_date"
+                android:id="@+id/comment_counter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/article_comment_image_view"
+                android:layout_toRightOf="@id/article_comment_image_view"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_alignParentBottom="true"
+                android:text="0"
+                />
+
+
+            <TextView
+                android:id="@+id/article_posted_date"
                 style="@style/end_of_image_exists"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -63,10 +84,7 @@
 
         </RelativeLayout>
 
-    </LinearLayout>
+    </FrameLayout>
 
 
 </android.support.v7.widget.CardView>
-
-    <!--          android:src="@mipmap/ph"
-      -->

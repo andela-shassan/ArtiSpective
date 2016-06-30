@@ -7,8 +7,16 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.provider.CalendarContract;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
+
+import java.util.Calendar;
+
+import artispective.blogspot.com.ng.artispective.models.model.Event;
 
 public class Helper {
 
@@ -65,10 +73,77 @@ public class Helper {
     public static String getRealPathFromURI_BelowAPI11(Context context, Uri contentUri) {
         String[] proj = {MediaStore.Images.Media.DATA};
         Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
-        int column_index
-                = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
     }
 
+    public static void hideSoftKeyboard(Context context, View view) {
+        try {
+            InputMethodManager im;
+            im = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            im.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void showToast(String message) {
+        Toast.makeText(ContextProvider.getContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    public static void addToCalendar(Context context, Event e) {
+        Calendar beginTime = Calendar.getInstance();
+        String date = e.getDate();
+        String[] dates = date.split("-");
+        int year = Integer.parseInt(dates[0]);
+        int month = Integer.parseInt(dates[1]) - 1;
+        int day = Integer.parseInt(dates[2].substring(0,2));
+        int hour = Integer.parseInt(dates[2].substring(3,5));
+        int minute = Integer.parseInt(dates[2].substring(6,8));
+        beginTime.set(year, month, day, hour, minute);
+        Calendar endTime = Calendar.getInstance();
+        endTime.set(year, month, day, 22, 0);
+        String details;
+        details = (e.getDetails().length() < 100)? e.getDetails(): e.getDetails().substring(0,100);
+        Intent intent = new Intent(Intent.ACTION_INSERT)
+            .setData(CalendarContract.Events.CONTENT_URI)
+            .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, beginTime.getTimeInMillis())
+            .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime.getTimeInMillis())
+            .putExtra(CalendarContract.Events.TITLE, e.getTitle())
+            .putExtra(CalendarContract.Events.DESCRIPTION, details)
+            .putExtra(CalendarContract.Events.EVENT_LOCATION, e.getAddress())
+            .putExtra(CalendarContract.Events.ALLOWED_REMINDERS, CalendarContract.Events.MAX_REMINDERS)
+            .putExtra(CalendarContract.Events.AVAILABILITY, CalendarContract.Events.AVAILABILITY_FREE);
+        context.startActivity(intent);
+
+    }
+
+    public static String formatDateTime(String date) {
+        String[] dateArray = date.split("-");
+        return String.format("%s/%s/%s %s", dateArray[2].substring(0, 2), dateArray[1],
+                dateArray[0], dateArray[2].substring(3,8) );
+    }
+
+    public static void launchHome(Context context) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
+    }
+
+    public static void sendNote(Context context, Event event) {
+        String u;
+        u = (event.getImages().size() > 0)? event.getImages().get(0): Constants.DEFAULT_IMAGE;
+        Uri pictureUri = Uri.parse(u);
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, event.getDetails());
+        shareIntent.putExtra(Intent.EXTRA_STREAM, pictureUri);
+        shareIntent.putExtra(Intent.EXTRA_TITLE, event.getTitle());
+        shareIntent.setType("image/*");
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        context.startActivity(Intent.createChooser(shareIntent, "Share images..."));
+    }
 }

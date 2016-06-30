@@ -2,7 +2,9 @@ package artispective.blogspot.com.ng.artispective.activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -12,15 +14,18 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TimePicker;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,32 +34,42 @@ import java.io.IOException;
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.model.BigEvent;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
-import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.CustomDatePicker;
+import artispective.blogspot.com.ng.artispective.utils.CustomTimePicker;
+import artispective.blogspot.com.ng.artispective.utils.Endpoint;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
-public class CreateEventActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateEventActivity extends AppCompatActivity implements View.OnClickListener,
+        DatePickerDialog.OnDateSetListener, TimePickerDialog.OnTimeSetListener {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 2324;
-    private EditText editName, editDate, editLocation, editDetail;
-    private String eventName, eventDate, eventLocation, eventDetail;
-    private ImageView eventImage, eventImage2, eventImage3;
+    private EditText editName, editDate, editTime, editLocation, editDetail;
+    private String eventName, eventDate, eventTime, eventLocation, eventDetail;
+    private ImageView eventImage, eventImage2, eventImage3, dateButton, timeButtom;
     private Button saveButton;
     private static final int SELECT_IMAGE_CODE = 1960;
     private static final int SELECT_IMAGE_CODE2 = 1961;
     private static final int SELECT_IMAGE_CODE3 = 1962;
-    public Bitmap bitmap, bitmap2, bitmap3;
     private ProgressDialog progressDialog;
-    private Bitmap placeHolderBitmap;
     private File file, file2, file3;
     private String filePath, filePath2, filePath3;
     private String placeholderPath;
+    private Event event;
+    private String userToken;
+    private String userId;
+    private boolean updateEvent;
+    private RequestBody usersId, usersToken, eventsName, eventsDetail, eLocat, eventDated;
+    private RequestBody eventId;
+    private String dateTime;
+    private MediaType MEDIA_TYPE_PNG;
+
 
 
     @Override
@@ -62,8 +77,33 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_event);
         findViews();
-
         permissionChecker();
+
+        updateEvent = false;
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("event")) {
+            event = intent.getParcelableExtra("event");
+            setTitle("Update Event");
+            setUpEditView(event);
+            updateEvent = true;
+        }
+        MEDIA_TYPE_PNG = MediaType.parse("image/png");
+        userId = Helper.getUserData("user_id");
+        userToken = Helper.getUserData("user_token");
+
+    }
+
+    private void setUpEditView(Event event) {
+        String[] dates = event.getDate().split("-");
+        String date = dates[2].substring(0,2) + "/" + dates[1] + "/" + dates[0];
+        String time = dates[2].substring(3,8);
+        editName.setText(event.getTitle());
+        editName.requestFocus();
+        editDate.setText(date);
+        editTime.setText(time);
+        editLocation.setText(event.getAddress());
+        editDetail.setText(event.getDetails());
+        saveButton.setText(R.string.update_event_button);
     }
 
     private void permissionChecker() {
@@ -109,6 +149,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
     private void findViews() {
         editName = (EditText) findViewById(R.id.event_name);
         editDate = (EditText) findViewById(R.id.event_date);
+        editTime = (EditText) findViewById(R.id.event_time);
         editLocation = (EditText) findViewById(R.id.event_location);
         editDetail = (EditText) findViewById(R.id.event_additional_details);
         saveButton = (Button) findViewById(R.id.save_button);
@@ -123,23 +164,35 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         eventImage3 = (ImageView) findViewById(R.id.event_banner3);
         assert eventImage3 != null;
         eventImage3.setOnClickListener(this);
+        dateButton = (ImageView) findViewById(R.id.date_button);
+        assert dateButton != null;
+        dateButton.setOnClickListener(this);
+        timeButtom = (ImageView) findViewById(R.id.time_button);
+        assert timeButtom != null;
+        timeButtom.setOnClickListener(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.fragment_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void attemptSaveEvent() {
-        if (file == null) {
-            showToast("At least main image is required to post an event!");
+        Helper.hideSoftKeyboard(this, saveButton);
+        if (file == null && !updateEvent) {
+            Helper.showToast("At least main image is required to post an event!");
             return;
         }
-        eventName = editName.getText().toString().trim();
-        eventDate = editDate.getText().toString().trim();
-        eventLocation = editLocation.getText().toString().trim();
-        eventDetail = editDetail.getText().toString().trim();
+        this.eventName = editName.getText().toString().trim();
+        this.eventDate = editDate.getText().toString().trim();
+        this.eventTime = editTime.getText().toString().trim();
+        this.eventLocation = editLocation.getText().toString().trim();
+        this.eventDetail = editDetail.getText().toString().trim();
 
         boolean cancel = false;
         View focusView = null;
+
+        if (TextUtils.isEmpty(eventTime)) {
+            this.eventTime = "07:00";
+        }
 
         if (TextUtils.isEmpty(eventName)) {
             this.editName.setError(getString(R.string.error_empty_event_name));
@@ -179,10 +232,33 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
             if (ConnectionChecker.isConnected()) {
                 setProgressDialog();
 
-                String[] dateArray = eventDate.split("/");
-                String date = dateArray[1] + "/" + dateArray[0] + "/" + dateArray[2];
+                String[] dates = eventDate.split("/");
+                dateTime = String.format("%s-%s-%sT%s", dates[2], dates[1], dates[0], eventTime);
+                Log.d("semiu date", dateTime);
 
-                uploadEvent(date);
+                if (event != null) {
+                    eventId = RequestBody.create(MediaType.parse("text/plain"), event.getId());
+
+                }
+                usersId = RequestBody.create(MediaType.parse("text/plain"), this.userId);
+                usersToken = RequestBody.create(MediaType.parse("text/plain"), this.userToken);
+                eventsName = RequestBody.create(MediaType.parse("text/plain"), this.eventName);
+                eventsDetail = RequestBody.create(MediaType.parse("text/plain"), this.eventDetail);
+                eLocat = RequestBody.create(MediaType.parse("text/plain"), this.eventLocation);
+                eventDated  = RequestBody.create(MediaType.parse("text/plain"), dateTime);
+
+                if (event == null) {
+                    if (file3 != null && file2 != null && file != null) {
+                        uploadEventFile3();
+                    } else if (file2 != null && file != null) {
+                        uploadEventFile2();
+                    } else {
+                        uploadEventFile1();
+                    }
+                } else {
+                    updateEvent();
+                }
+
 
             } else {
                 ConnectionChecker.showNoNetwork();
@@ -191,46 +267,144 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void uploadEvent(String eventDate) {
-        String id = Helper.getUserData("user_id");
-        String token = Helper.getUserData("user_token");
-
-        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
-
-        RequestBody userId = RequestBody.create(MediaType.parse("text/plain"), id);
-        RequestBody userToken = RequestBody.create(MediaType.parse("text/plain"), token);
-        RequestBody eventName = RequestBody.create(MediaType.parse("text/plain"), this.eventName);
-        RequestBody eDetail = RequestBody.create(MediaType.parse("text/plain"), this.eventDetail);
-        RequestBody eLocat = RequestBody.create(MediaType.parse("text/plain"), this.eventLocation);
-        RequestBody eventDated  = RequestBody.create(MediaType.parse("text/plain"), eventDate);
+    private void uploadEventFile1() {
         RequestBody eventImage = RequestBody.create(MEDIA_TYPE_PNG, file);
-
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_EVENT_URL).addEvent(
-                userId, userToken, eventName, eDetail, eLocat, eventDated,eventImage).enqueue(
-
-                new Callback<BigEvent>() {
+        Observable<BigEvent> observable = Endpoint.RxFactory.getEndpoint().rxAddEvent(userToken,
+                usersId, eventsName, eventsDetail, eLocat, eventDated, eventImage);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<BigEvent>() {
+                    @Override
+                    public void onCompleted() {
+                        addEventSuccessResponse("Event created successfully");
+                    }
 
                     @Override
-                    public void onResponse(Call<BigEvent> call, Response<BigEvent> response) {
-                        int code = response.code();
-                        if (code == 200) {
-                            Event e = response.body().getEvent();
-                            showToast(e.getTitle() +" Created successfully");
-                            Helper.launchActivity(CreateEventActivity.this, HomeActivity.class);
-                            CreateEventActivity.this.finish();
-                        } else {
-                            showToast("Something went wrong");
-                        }
+                    public void onError(Throwable e) {
+                        Log.e("semiu", e.getMessage());
                         dismissProgressDialog();
                     }
 
                     @Override
-                    public void onFailure(Call<BigEvent> call, Throwable t) {
-                        showToast("Failed to add the event");
+                    public void onNext(BigEvent bigEvent) {
+
+                    }
+                });
+    }
+
+    private void uploadEventFile2() {
+        RequestBody eventImage = RequestBody.create(MEDIA_TYPE_PNG, file);
+        RequestBody eventImage2 = RequestBody.create(MEDIA_TYPE_PNG, file2);
+        Observable<BigEvent> observable = Endpoint.RxFactory.getEndpoint().rxAddEvent2(userToken,
+                usersId, eventsName, eventsDetail, eLocat, eventDated, eventImage, eventImage2);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<BigEvent>() {
+                    @Override
+                    public void onCompleted() {
+                        addEventSuccessResponse("Event created successfully");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("semiu", e.getMessage());
                         dismissProgressDialog();
                     }
-                }
-        );
+
+                    @Override
+                    public void onNext(BigEvent bigEvent) {
+
+                    }
+                });
+    }
+
+    private void uploadEventFile3() {
+        RequestBody eventImage = RequestBody.create(MEDIA_TYPE_PNG, file);
+        RequestBody eventImage2 = RequestBody.create(MEDIA_TYPE_PNG, file2);
+        RequestBody eventImage3 = RequestBody.create(MEDIA_TYPE_PNG, file3);
+
+        Observable<BigEvent> observable = Endpoint.RxFactory.getEndpoint().rxAddEvent3(userToken,
+        usersId, eventsName, eventsDetail, eLocat, eventDated, eventImage,eventImage2,eventImage3);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<BigEvent>() {
+                    @Override
+                    public void onCompleted() {
+                        addEventSuccessResponse("Event created successfully");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("semiu", e.getMessage());
+                        dismissProgressDialog();
+                    }
+
+                    @Override
+                    public void onNext(BigEvent bigEvent) {
+
+                    }
+                });
+    }
+
+
+    private void addEventSuccessResponse(String message) {
+        Helper.launchActivity(this, EventActivity.class);
+        dismissProgressDialog();
+        Helper.showToast(message);
+        finish();
+    }
+
+    private void updateEvent(File file) {
+        MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
+        RequestBody image = RequestBody.create(MEDIA_TYPE_PNG, file);
+
+        Observable<BigEvent> observable = Endpoint.RxFactory.getEndpoint().rxUpdateEvent(
+                eventId, usersId, usersToken, eventsName, eventsDetail, eLocat, eventDated, image);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<BigEvent>() {
+                    @Override
+                    public void onCompleted() {
+                        addEventSuccessResponse("Event Updated successfully");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("semiu", e.getMessage());
+                        dismissProgressDialog();
+                        Helper.showToast("Something went wrong update with file");
+                    }
+
+                    @Override
+                    public void onNext(BigEvent bigEvent) {
+
+                    }
+                });
+    }
+
+    private void updateEvent() {
+        Observable<BigEvent> observable = Endpoint.RxFactory.getEndpoint().rxUpdateEvent(
+                userToken, event.getId(), userId, eventName, eventDetail, eventLocation, dateTime);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<BigEvent>() {
+                    @Override
+                    public void onCompleted() {
+                        addEventSuccessResponse("Event Updated successfully");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("semiu", e.getMessage());
+                        dismissProgressDialog();
+                        Helper.showToast("Something went wrong update with file");
+                    }
+
+                    @Override
+                    public void onNext(BigEvent bigEvent) {
+
+                    }
+                });
     }
 
     private boolean isValidEventDate(String eventDate) {
@@ -257,6 +431,14 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
             case R.id.event_banner3:
                 openGallery(SELECT_IMAGE_CODE3);
                 break;
+            case R.id.date_button:
+                DialogFragment dialog = new CustomDatePicker();
+                dialog.show(getSupportFragmentManager(), "date_picker");
+                break;
+            case R.id.time_button:
+                DialogFragment fragment = new CustomTimePicker();
+                fragment.show(getSupportFragmentManager(), "time_picker");
+                break;
             default:
                 break;
         }
@@ -267,8 +449,7 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         progressDialog = new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Event "+eventName +" is being created");
-        progressDialog.setTitle("Uploading Data");
+        progressDialog.setMessage("Event " + eventName + " is being created");
         progressDialog.show();
     }
 
@@ -296,19 +477,16 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         switch (requestCode) {
             case SELECT_IMAGE_CODE:
                 setBitmapToImageView(resultCode, data, eventImage);
-                bitmap = placeHolderBitmap;
                 filePath = placeholderPath;
                 file = new File(filePath);
                 break;
             case SELECT_IMAGE_CODE2:
                 setBitmapToImageView(resultCode, data, eventImage2);
-                bitmap2 = placeHolderBitmap;
                 filePath2 = placeholderPath;
-                file = new File(filePath2);
+                file2 = new File(filePath2);
                 break;
             case SELECT_IMAGE_CODE3:
                 setBitmapToImageView(resultCode, data, eventImage3);
-                bitmap3 = placeHolderBitmap;
                 filePath3 = placeholderPath;
                 file3 = new File(filePath3);
                 break;
@@ -325,9 +503,6 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
 
                 Bitmap b = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
                 imageView.setImageBitmap(b);
-                placeHolderBitmap = b;
-//                Uri uri = handleImageUri(data.getData());
-//                placeholderPath = getPathFromURI(uri);
                 placeholderPath = Helper.getRealPathFromURI_API19(this, data.getData());
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -337,9 +512,36 @@ public class CreateEventActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        int month = 1 + monthOfYear;
+        String day = (dayOfMonth < 10) ? "0" + dayOfMonth : dayOfMonth +"";
+        String mth = (month < 10) ? "0" + month : month + "";
+        editDate.setText(String.format("%s/%s/%s", day, mth, year));
     }
 
+    @Override
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        String min = (minute < 10) ? "0" + minute : minute + "";
+        String hour = (hourOfDay < 10) ? "0" + hourOfDay : hourOfDay + "";
+        editTime.setText(String.format("%s:%s", hour, min));
+    }
 
+    @Override
+    protected void onDestroy() {
+        clearForm();
+        super.onDestroy();
+    }
+
+    private void clearForm() {
+        editName.setText(null);
+        editDate.setText(null);
+        editTime.setText(null);
+        editLocation.setText(null);
+        editDetail.setText(null);
+        eventImage.setImageDrawable(null);
+        eventImage2.setImageDrawable(null);
+        eventImage3.setImageDrawable(null);
+    }
 }

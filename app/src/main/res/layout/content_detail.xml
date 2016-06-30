@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="artispective.blogspot.com.ng.artispective.activities.DetailActivity">
+    tools:context=".activities.DetailEvent">
     <!--tools:showIn="@layout/activity_detail">-->
 
     <ImageView
@@ -70,7 +70,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/detail_page_detail_text_hint"
-                android:scrollbars="vertical"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
         </ScrollView>

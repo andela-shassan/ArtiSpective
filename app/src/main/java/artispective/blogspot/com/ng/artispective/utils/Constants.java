@@ -11,7 +11,16 @@ public class Constants {
     public static final String GET_ALL_EVENTS = "http://artispective.herokuapp.com/api/v1/getAllEvents/";
     public static final String USER_PROFILE = "http://artispective.herokuapp.com/api/v1/getUserProfile/{id}/";
     public static final String REMOVE_EVENT = "http://artispective.herokuapp.com/api/v1/removeEvent/";
-    public static final String UPDATE_EVENT = "http://artispective.herokuapp.com/api/v1/updateEvent";
+    public static final String UPDATE_EVENT = "http://artispective.herokuapp.com/api/v1/updateEvent/";
+    public static final String ADD_POST_URL = "http://artispective.herokuapp.com/api/v1/addPost/";
+    public static final String UPDATE_POST_URL = "http://artispective.herokuapp.com/api/v1/updatePost/";
+    public static final String REMOVE_POST_URL = "http://artispective.herokuapp.com/api/v1/removePost/";
+    public static final String GET_ALL_POST_URL = "http://artispective.herokuapp.com/api/v1/getAllPosts/";
+    public static final String ADD_COMMENT_URL = "http://artispective.herokuapp.com/api/v1/addComment/";
+    public static final String GET_ONE_POST_URL = "http://artispective.herokuapp.com/api/v1/getOnePost/";
+    public static final String DELETE_COMMENT_URL = "http://artispective.herokuapp.com/api/v1/editComment/";
+    public static final String EDIT_COMMENT_URL = "http://artispective.herokuapp.com/api/v1/deleteComment/";
+
 
     public static final String DEFAULT_IMAGE = "https://develop.backendless.com/console/A9055167-61DE" +
             "-81A4-FF76-A84111205300/appversion/5321A127-7220-D203-FF33-0B546371BB00/" +

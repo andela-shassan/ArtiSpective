@@ -41,6 +41,7 @@
             android:layout_gravity="start|bottom"
             android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp"
+            android:visibility="gone"
             android:background="@android:color/transparent"
             android:contentDescription="@string/clear_image"
             android:src="@mipmap/remove_image2" />
@@ -51,6 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:layout_marginBottom="5dp"
+            android:background="@color/dark_background"
             >
         <ImageView
             android:id="@+id/event_banner2"
@@ -58,6 +60,9 @@
             android:layout_height="75dp"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
             android:scaleType="fitXY"
             android:background="@android:color/transparent"
             android:contentDescription="@string/use_phone_camera"
@@ -67,6 +72,9 @@
             android:id="@+id/event_banner3"
             android:layout_width="75dp"
             android:layout_height="75dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
             android:scaleType="fitXY"
             android:background="@android:color/transparent"
             android:contentDescription="@string/use_phone_camera"
@@ -81,6 +89,7 @@
             android:layout_gravity="end|bottom"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
+            android:visibility="gone"
             android:background="@android:color/transparent"
             android:contentDescription="@string/use_phone_camera"
             android:src="@mipmap/camera2" />
@@ -113,27 +122,67 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/event_name"
                     android:inputType="text"
-                    android:maxLines="1"
-                    android:singleLine="true" />
+                    />
 
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <LinearLayout
                 android:id="@+id/event_date1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/event_name1">
+                android:layout_below="@id/event_name1"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/event_date"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
                     android:hint="@string/event_date"
                     android:inputType="date"
                     android:maxLines="1"
                     android:singleLine="true" />
 
-            </android.support.design.widget.TextInputLayout>
+                <ImageView
+                    android:id="@+id/date_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="0dp"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="24dp"
+                    android:layout_marginRight="24dp"
+                    android:src="@drawable/date"/>
+
+
+                <EditText
+                    android:id="@+id/event_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:gravity="center"
+                    android:layout_marginLeft="24dp"
+                    android:layout_marginStart="24dp"
+                    android:hint="@string/event_time"
+                    android:inputType="time"
+                    android:maxLines="1"
+                    android:singleLine="true" />
+
+                <ImageView
+                    android:id="@+id/time_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginRight="16dp"
+                    android:src="@drawable/time"/>
+
+            </LinearLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/event_location1"

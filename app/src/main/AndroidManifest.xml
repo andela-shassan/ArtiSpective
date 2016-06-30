@@ -4,8 +4,8 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- To auto-complete the emailAddress text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -26,19 +26,20 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
-        <activity android:name="com.facebook.FacebookActivity"
-            android:configChanges=
-                "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:label="@string/app_name">
-        </activity>
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
-        <provider android:authorities="com.facebook.app.FacebookContentProvider873457016099545"
+        <provider
             android:name="com.facebook.FacebookContentProvider"
-            android:exported="true">
-        </provider>
+            android:authorities="com.facebook.app.FacebookContentProvider873457016099545"
+            android:exported="true" />
 
         <activity
             android:name=".activities.Welcome"
@@ -50,35 +51,38 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.HomeActivity"
-            android:label="@string/title_activity_home"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:name=".activities.EventActivity"
+            android:label="@string/events"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomeActivity" />
+        </activity>
         <activity
             android:name=".activities.LoginActivity"
             android:label="@string/title_activity_login"
-            android:parentActivityName=".activities.HomeActivity"
+            android:parentActivityName=".activities.EventActivity"
             android:windowSoftInputMode="stateVisible">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="artispective.blogspot.com.ng.artispective.activities.HomeActivity" />
+                android:value=".activities.HomeActivity" />
         </activity>
         <activity
             android:name=".activities.RegisterActivity"
             android:label="@string/title_activity_register"
-            android:parentActivityName=".activities.HomeActivity"
+            android:parentActivityName=".activities.EventActivity"
             android:windowSoftInputMode="stateVisible">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="artispective.blogspot.com.ng.artispective.activities.HomeActivity" />
+                android:value=".activities.HomeActivity" />
         </activity>
-
         <activity
-            android:name=".activities.DetailActivity"
+            android:name=".activities.DetailEvent"
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="artispective.blogspot.com.ng.artispective.activities.HomeActivity" />
+                android:value=".activities.EventActivity" />
         </activity>
         <activity
             android:name=".activities.CreateEventActivity"
@@ -86,7 +90,7 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="artispective.blogspot.com.ng.artispective.activities.HomeActivity" />
+                android:value=".activities.EventActivity" />
         </activity>
         <activity
             android:name=".activities.ProfileActivity"
@@ -94,8 +98,30 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="artispective.blogspot.com.ng.artispective.activities.HomeActivity" />
+                android:value=".activities.HomeActivity" />
         </activity>
+        <activity
+            android:name=".activities.HomeActivity"
+            android:label="@string/title_activity_home"
+            android:theme="@style/AppTheme" />
+        <activity android:name=".activities.CreateArticleActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomeActivity"/>
+        </activity>
+        <activity
+            android:name=".activities.DetailArticle"
+            android:label="@string/title_activity_detail_article"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".activities.HomeActivity" />
+        </activity>
+        <activity
+            android:name=".nested.ScrollingActivity"
+            android:label="@string/title_activity_scrolling"
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>

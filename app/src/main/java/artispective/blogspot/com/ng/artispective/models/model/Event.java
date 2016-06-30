@@ -36,9 +36,9 @@ public class Event implements Parcelable {
     @SerializedName("dateCreated")
     @Expose
     private String dateCreated;
-    @SerializedName("userId")
+    @SerializedName("addedBy")
     @Expose
-    private String userId;
+    private AddedBy addedBy;
 
     public String getTitle() {
         return title;
@@ -96,12 +96,8 @@ public class Event implements Parcelable {
         this.dateCreated = dateCreated;
     }
 
-    public String getUserId() {
-        return this.userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public AddedBy getAddedBy() {
+        return addedBy;
     }
 
 
@@ -119,7 +115,7 @@ public class Event implements Parcelable {
         dest.writeStringList(this.images);
         dest.writeString(this.address);
         dest.writeString(this.dateCreated);
-        dest.writeString(this.userId);
+        dest.writeParcelable(this.addedBy, flags);
     }
 
     protected Event(Parcel in) {
@@ -130,7 +126,7 @@ public class Event implements Parcelable {
         this.images = in.createStringArrayList();
         this.address = in.readString();
         this.dateCreated = in.readString();
-        this.userId = in.readString();
+        this.addedBy = in.readParcelable(AddedBy.class.getClassLoader());
     }
 
     public static final Creator<Event> CREATOR = new Creator<Event>() {

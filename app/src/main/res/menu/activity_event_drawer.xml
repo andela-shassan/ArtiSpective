@@ -6,6 +6,11 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/vector_drawable_ic_home_white___px"
             android:title="@string/home" />
+
+        <item android:id="@+id/nav_event"
+            android:icon="@drawable/vector_drawable_event"
+            android:title="@string/events"/>
+
         <item
             android:id="@+id/nav_user"
             android:icon="@drawable/vector_drawable_ic_account_circle_white___px"
