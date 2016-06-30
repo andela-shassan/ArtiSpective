@@ -22,13 +22,13 @@ import artispective.blogspot.com.ng.artispective.adapters.ArticleDetailPagerAdap
 import artispective.blogspot.com.ng.artispective.interfaces.CommentClickListener;
 import artispective.blogspot.com.ng.artispective.models.article.ArticleResponse;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
-import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Endpoint;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class DetailArticle extends AppCompatActivity implements CommentClickListener {
 
@@ -45,6 +45,7 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
     private AlertDialog dialog;
     private Post post;
     private MenuItem item;
+    private int commentPodition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +59,18 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
 
         pagerAdapter = new ArticleDetailPagerAdapter(this, this, posts);
 
-        viewPager = (ViewPager) findViewById(R.id.articlePager);
-        viewPager.setAdapter(pagerAdapter);
-        viewPager.setCurrentItem(currentPosition);
+        setUpViewPager();
 
         inflater = getLayoutInflater();
 
         userId = Helper.getUserData("user_id");
         userToken = Helper.getUserData("user_token");
+    }
+
+    private void setUpViewPager() {
+        viewPager = (ViewPager) findViewById(R.id.articlePager);
+        viewPager.setAdapter(pagerAdapter);
+        viewPager.setCurrentItem(currentPosition);
     }
 
     private void getEventsAndPosition() {
@@ -105,9 +110,11 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
             return;
         }
 
+        currentPosition = position;
         final Post post = posts.get(position);
         view = inflater.inflate(R.layout.add_comment_layout, null);
         editComment = (EditText) view.findViewById(R.id.comment);
+        editComment.requestFocus();
         postComment = (Button) view.findViewById(R.id.post_comment_button);
         postComment.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,30 +151,32 @@ public class DetailArticle extends AppCompatActivity implements CommentClickList
     }
 
     private void uploadComment(Post post) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.ADD_COMMENT_URL)
-            .addComment(userToken, userId, post.getId(), comment)
-            .enqueue(new Callback<ArticleResponse>() {
-                @Override
-                public void onResponse(Call<ArticleResponse> c, Response<ArticleResponse> r) {
-                    int code = r.code();
-                    if (code == 200) {
+        Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
+                .rxAddComment(userToken, userId, post.getId(), comment);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArticleResponse>() {
+                    @Override
+                    public void onCompleted() {
                         Helper.showToast("comment added successfully");
-                        Log.d("semiu ", r.body().getPost().getHeading());
-                    } else {
-                        Helper.showToast("Something went wrong. Please try again");
+                        setUpViewPager();
+                        dismissDialog();
+                        recreate();
                     }
-                    Log.d("semiu add C code ", code + " ");
-                    dismissDialog();
-                    recreate();
-                }
 
-                @Override
-                public void onFailure(Call<ArticleResponse> call, Throwable t) {
-                    Log.d("semiu  ", "Failure to add comment ");
-                    dismissDialog();
-                    recreate();
-                }
-            });
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.e("semiu uploadComment", e.getMessage());
+                        dismissDialog();
+                        Helper.showToast("Something went wrong. Please try again");
+                        recreate();
+                    }
+
+                    @Override
+                    public void onNext(ArticleResponse articleResponse) {
+
+                    }
+                });
     }
 
     private void dismissDialog() {

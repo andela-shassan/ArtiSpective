@@ -1,6 +1,7 @@
 package artispective.blogspot.com.ng.artispective.adapters;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,13 +15,14 @@ import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Helper;
 
 public class DetailPagerAdapter extends PagerAdapter {
     private Context context;
     private LayoutInflater layoutInflater;
     private ArrayList<Event> events;
     private ImageView imageView;
+    private int i = 0;
 
     public DetailPagerAdapter(Context context, ArrayList<Event> events) {
         this.context = context;
@@ -41,9 +43,9 @@ public class DetailPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
 
-        Event event = events.get(position);
+        final Event event = events.get(position);
         TextView eventTitle, eventContent, eventDate, eventLocation;
-        ImageView eventImage;
+        final ImageView eventImage;
 
         View convertView = layoutInflater.inflate(R.layout.content_detail, container, false);
 
@@ -54,23 +56,31 @@ public class DetailPagerAdapter extends PagerAdapter {
         eventImage = (ImageView) convertView.findViewById(R.id.detail_event_images);
         imageView = eventImage;
 
-        String[] dateArray = event.getDate().split("-");
-        String date = dateArray[2].substring(0, 2) + "/" + dateArray[1] + "/" + dateArray[0];
+        String date = Helper.formatDateTime(event.getDate());
 
         eventTitle.setText(event.getTitle());
         eventContent.setText(event.getDetails());
         eventLocation.setText(event.getAddress());
         eventDate.setText(date);
 
-        String url;
-        url = (event.getImages().size() > 0) ? event.getImages().get(0) : Constants.DEFAULT_IMAGE;
+        final Handler handler = new Handler();
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                picasso(eventImage, scrollImage(event));
+                handler.postDelayed(this, 10000);
+            }
+        };
 
-        Picasso.with(context).load(url).placeholder(R.mipmap.default_image)
-                .error(R.mipmap.default_image).fit().into(eventImage);
-
+        runnable.run();
         container.addView(convertView);
 
         return convertView;
+    }
+
+    private void picasso(ImageView eventImage, String url) {
+        Picasso.with(context).load(url).placeholder(R.mipmap.default_image)
+                .error(R.mipmap.default_image).fit().into(eventImage);
     }
 
     @Override
@@ -80,6 +90,13 @@ public class DetailPagerAdapter extends PagerAdapter {
 
     public ImageView getImageView() {
         return this.imageView;
+    }
+
+    private String scrollImage(Event event) {
+        int imgNo = event.getImages().size();
+        String next =  event.getImages().get(i%imgNo);
+        i++;
+        return next;
     }
 
 

@@ -7,7 +7,6 @@
         android:icon="@drawable/share"
         android:title="@string/share"
         android:orderInCategory="2"
-        app:actionViewClass="android.widget.Spinner"
         app:showAsAction="ifRoom" />
 
     <item
@@ -19,9 +18,3 @@
         />
 
 </menu>
-
-<!--
-    app:actionProviderClass="android.support.v7.widget.ShareActionProvider"
-            app:actionViewClass="android.widget.Spinner"
-
--->

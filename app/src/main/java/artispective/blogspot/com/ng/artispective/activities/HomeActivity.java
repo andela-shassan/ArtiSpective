@@ -17,9 +17,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import artispective.blogspot.com.ng.artispective.R;
@@ -28,14 +29,14 @@ import artispective.blogspot.com.ng.artispective.interfaces.LogoutAuthentication
 import artispective.blogspot.com.ng.artispective.models.article.ArticleResponse;
 import artispective.blogspot.com.ng.artispective.models.article.GetArticles;
 import artispective.blogspot.com.ng.artispective.models.article.Post;
-import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Endpoint;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import artispective.blogspot.com.ng.artispective.utils.UserAuthentication;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class HomeActivity extends AppCompatActivity implements NavigationView
         .OnNavigationItemSelectedListener, LogoutAuthentication, AdapterView.OnItemClickListener,
@@ -47,6 +48,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
     private ArticleListAdapter adapter;
     private ProgressDialog progressDialog;
     private String userToken, userId;
+    private TextView noNetworkTextView;
+    private Button refreshButton;
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +69,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         navigationView.setNavigationItemSelectedListener(this);
         setUpFAB();
         toggleLoginLogout();
-        fetchArticles();
         userId = Helper.getUserData("user_id");
         userToken = Helper.getUserData("user_token");
+        fetchArticlesAsObservable();
     }
 
     private void setUpListView() {
@@ -77,33 +81,55 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         listView.setOnItemClickListener(this);
         listView.setOnItemLongClickListener(this);
         listView.setDividerHeight(20);
+        adapter.notifyDataSetChanged();
     }
 
-    private void fetchArticles() {
-        if (ConnectionChecker.isConnected()) {
-            showProgressDialog();
-            ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.GET_ALL_POST_URL)
-                    .getAllArticles().enqueue(new Callback<GetArticles>() {
-                @Override
-                public void onResponse(Call<GetArticles> call, Response<GetArticles> response) {
-                    int code = response.code();
-                    if (code == 200) {
-                        posts = (ArrayList<Post>) response.body().getPosts();
-                        setUpListView();
-                    } else {
-                        Helper.showToast("Something went wrong. Try again");
-                    }
-                    dismissProgressDialog();
-                }
-
-                @Override
-                public void onFailure(Call<GetArticles> call, Throwable t) {
-                    dismissProgressDialog();
-                }
-            });
-        } else {
-            ConnectionChecker.showNoNetwork();
+    private void fetchArticlesAsObservable() {
+        if (!ConnectionChecker.isConnected()) {
+            toggleRefreshVisibility();
+            return;
         }
+        showProgressDialog();
+        Observable<GetArticles> observable = Endpoint.RxFactory.getEndpoint().rxGetAllArticles();
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<GetArticles>() {
+                    @Override
+                    public void onCompleted() {
+                        setUpListView();
+                        adapter.notifyDataSetChanged();
+                        dismissProgressDialog();
+                        toggleRefreshVisibility();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        dismissProgressDialog();
+                        toggleRefreshVisibility();
+                        Log.d("semiu", e.getMessage());
+                    }
+
+                    @Override
+                    public void onNext(GetArticles post) {
+                        posts = (ArrayList<Post>) post.getPosts();
+                    }
+                });
+
+    }
+
+    private void toggleRefreshVisibility() {
+        if (posts == null) {
+            setRefreshMessageVisibility(View.VISIBLE);
+        } else if (posts.size() < 1) {
+            setRefreshMessageVisibility(View.VISIBLE);
+        } else {
+            setRefreshMessageVisibility(View.GONE);
+        }
+    }
+
+    private void setRefreshMessageVisibility(int visibility) {
+        noNetworkTextView.setVisibility(visibility);
+        refreshButton.setVisibility(visibility);
     }
 
     @Override
@@ -114,7 +140,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -132,7 +158,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            fetchArticles();
+            fetchArticlesAsObservable();
             return true;
         }
 
@@ -144,29 +170,30 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.nav_home:
-                break;
             case R.id.nav_event:
                 Helper.launchActivity(this, EventActivity.class);
-                break;
+                return true;
             case R.id.nav_user:
                 Helper.launchActivity(this, ProfileActivity.class);
-                break;
+                return true;
             case R.id.nav_login:
                 Helper.launchActivity(this, LoginActivity.class);
-                break;
+                return true;
             case R.id.nav_logout:
+                closeDrawer();
                 UserAuthentication.logoutUser(this, userId, userToken);
-                break;
+                return true;
             default:
-                break;
-
+                closeDrawer();
+                return false;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.refreshDrawableState();
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+    }
+
+    private void closeDrawer() {
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
     }
 
     private void setUpFAB() {
@@ -175,6 +202,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
             @Override
             public void onClick(View v) {
                 Helper.launchActivity(HomeActivity.this, CreateArticleActivity.class);
+            }
+        });
+
+        noNetworkTextView = (TextView) findViewById(R.id.no_data_note);
+        refreshButton = (Button) findViewById(R.id.no_data_refresh);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fetchArticlesAsObservable();
             }
         });
     }
@@ -264,33 +300,30 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
     }
 
     private void deleteArticle(final Post post) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.REMOVE_POST_URL)
-                .removePost(userToken, userId, post.getId()).enqueue(
-                new Callback<ArticleResponse>() {
+        Observable<ArticleResponse> observable = Endpoint.RxFactory.getEndpoint()
+                .rxRemovePost(userToken, userId, post.getId());
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArticleResponse>() {
                     @Override
-                    public void onResponse(Call<ArticleResponse> c, Response<ArticleResponse> r) {
-                        int code = r.code();
-                        if (code == 200) {
-                            posts.remove(post);
-                            adapter.notifyDataSetChanged();
-                            Helper.showToast("Post removed successfully");
-                        } else {
-                            String msg = "";
-                            try {
-                                msg = r.errorBody().string();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            Log.d("semiu delete art", msg);
-                        }
+                    public void onCompleted() {
+                        posts.remove(post);
+                        adapter.notifyDataSetChanged();
+                        Helper.showToast("Post removed successfully");
+                        toggleRefreshVisibility();
                     }
 
                     @Override
-                    public void onFailure(Call<ArticleResponse> call, Throwable t) {
-                        Helper.showToast("Failed to delete the post");
+                    public void onError(Throwable e) {
+                        Log.e("semiu deletePost", e.getMessage());
+                        Helper.showToast("Error deleting post");
                     }
-                }
-        );
+
+                    @Override
+                    public void onNext(ArticleResponse articleResponse) {
+
+                    }
+                });
     }
 
     private void editArticle(Post post) {
@@ -299,4 +332,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView
         startActivity(intent);
     }
 
+    @Override
+    protected void onStop() {
+        closeDrawer();
+        super.onStop();
+    }
 }

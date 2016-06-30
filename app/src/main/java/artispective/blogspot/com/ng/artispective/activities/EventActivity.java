@@ -13,11 +13,14 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -27,14 +30,14 @@ import artispective.blogspot.com.ng.artispective.interfaces.LogoutAuthentication
 import artispective.blogspot.com.ng.artispective.models.events.Events;
 import artispective.blogspot.com.ng.artispective.models.model.DeleteEvent;
 import artispective.blogspot.com.ng.artispective.models.model.Event;
-import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
 import artispective.blogspot.com.ng.artispective.utils.ConnectionChecker;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Endpoint;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
 import artispective.blogspot.com.ng.artispective.utils.UserAuthentication;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 import static android.widget.AdapterView.OnItemClickListener;
 import static android.widget.AdapterView.OnItemLongClickListener;
@@ -45,10 +48,12 @@ public class EventActivity extends AppCompatActivity implements
         LogoutAuthentication, OnItemClickListener, OnItemLongClickListener {
 
     private ArrayList<Event> events;
-    boolean hasTriedFetch = false;
     private NavigationView navigationView;
     private FloatingActionButton addEventButton;
     private EventListAdapter eventListAdapter;
+    private TextView noNetworkTextView;
+    private Button refreshButton;
+    private DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +70,15 @@ public class EventActivity extends AppCompatActivity implements
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         setUpFAB();
         toggleLoginLogout();
-        fetchEvents();
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        fetchObservableEvents();
     }
 
     private void setUpFAB() {
@@ -77,6 +87,16 @@ public class EventActivity extends AppCompatActivity implements
             @Override
             public void onClick(View v) {
                 Helper.launchActivity(EventActivity.this, CreateEventActivity.class);
+            }
+        });
+
+        noNetworkTextView = (TextView) findViewById(R.id.no_data_note);
+        refreshButton = (Button) findViewById(R.id.no_data_refresh);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fetchObservableEvents();
+
             }
         });
     }
@@ -91,41 +111,36 @@ public class EventActivity extends AppCompatActivity implements
         listView.setDividerHeight(20);
     }
 
-    private void fetchEvents() {
-        if (ConnectionChecker.isConnected()) {
-            final ProgressDialog progressDialog = showProgressDialog();
-            ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.GET_ALL_EVENTS)
-                    .getAllEvents().enqueue(new Callback<Events>() {
-
-                @Override
-                public void onResponse(Call<Events> call, Response<Events> response) {
-                    if (response.body() != null && response.code() == 200) {
-                        Events bigEvent = response.body();
-                        events = (ArrayList<Event>) bigEvent.getEvents();
-                        setUpListView(events);
-
-                    } else {
-                        Helper.showToast("Something went wrong. Please try again");
-                    }
-                    progressDialog.dismiss();
-                }
-
-                @Override
-                public void onFailure(Call<Events> call, Throwable t) {
-                    progressDialog.dismiss();
-                    if (!hasTriedFetch) {
-                        hasTriedFetch = true;
-                        //fetchEvents();
-                    }
-                }
-            });
-        } else {
-            ConnectionChecker.showNoNetwork();
-            if (!hasTriedFetch) {
-                hasTriedFetch = true;
-               // fetchEvents();
-            }
+    private void fetchObservableEvents() {
+        if (!ConnectionChecker.isConnected()) {
+            toggleRefreshVisibility();
+            return;
         }
+        final ProgressDialog progressDialog = showProgressDialog();
+        Observable<Events> observable = Endpoint.RxFactory.getEndpoint().rxGetAllEvents();
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Events>() {
+
+                    @Override
+                    public void onCompleted() {
+                        progressDialog.dismiss();
+                        setUpListView(events);
+                        toggleRefreshVisibility();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("semiu", e.getMessage());
+                        toggleRefreshVisibility();
+                        progressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onNext(Events event) {
+                        events = (ArrayList<Event>) event.getEvents();
+                    }
+                });
     }
 
     @NonNull
@@ -140,8 +155,7 @@ public class EventActivity extends AppCompatActivity implements
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -160,7 +174,7 @@ public class EventActivity extends AppCompatActivity implements
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            fetchEvents();
+            fetchObservableEvents();
             return true;
         }
 
@@ -175,27 +189,28 @@ public class EventActivity extends AppCompatActivity implements
             case R.id.nav_home:
                 Helper.launchActivity(this, HomeActivity.class);
                 finish();
-                break;
-            case R.id.nav_event:
-                break;
+                return true;
             case R.id.nav_user:
                 Helper.launchActivity(this, ProfileActivity.class);
-                break;
+                return true;
             case R.id.nav_login:
                 Helper.launchActivity(this, LoginActivity.class);
-                break;
+                return true;
             case R.id.nav_logout:
+                closeDrawer();
                 logUserOut();
-                break;
+                return true;
             default:
-                break;
+                closeDrawer();
+                return false;
 
         }
+    }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.refreshDrawableState();
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+    private void closeDrawer() {
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
     }
 
     private void logUserOut() {
@@ -252,8 +267,7 @@ public class EventActivity extends AppCompatActivity implements
             return false;
         }
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Choose an action")
-                .setMessage("Delete cannot be undo!")
+        builder.setTitle("Choose an action").setMessage("Delete cannot be undo!")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         deleteEvent(event);
@@ -281,26 +295,49 @@ public class EventActivity extends AppCompatActivity implements
     }
 
     private void deleteEvent(final Event event) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.REMOVE_EVENT)
-                .deleteEvent(Helper.getUserData("user_token"), Helper.getUserData("user_id"),
-                        event.getId()).enqueue(new Callback<DeleteEvent>() {
+        Observable<DeleteEvent> observable = Endpoint.RxFactory.getEndpoint().rxDeleteEvent(
+                Helper.getUserData("user_token"), Helper.getUserData("user_id"), event.getId());
+        observable.subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<DeleteEvent>() {
                     @Override
-                    public void onResponse(Call<DeleteEvent> call, Response<DeleteEvent> res) {
-                        int code = res.code();
-                        if (code == 200) {
-                            events.remove(event);
-                            eventListAdapter.notifyDataSetChanged();
-                            Helper.showToast("Event removed successfully");
-                        } else {
-                            Helper.showToast("Something went wrong. Please try again");
-                        }
+                    public void onCompleted() {
+                        events.remove(event);
+                        eventListAdapter.notifyDataSetChanged();
+                        Helper.showToast("Event removed successfully");
+                        toggleRefreshVisibility();
                     }
 
                     @Override
-                    public void onFailure(Call<DeleteEvent> call, Throwable t) {
-                        Helper.showToast("Failed to delete event. Try again");
+                    public void onError(Throwable e) {
+                        Helper.showToast("Something went wrong. Please try again");
+                    }
+
+                    @Override
+                    public void onNext(DeleteEvent deleteEvent) {
+
                     }
                 });
+    }
+
+    private void toggleRefreshVisibility() {
+        if (events == null) {
+            setRefreshMessageVisibility(View.VISIBLE);
+        } else if (events.size() < 1) {
+            setRefreshMessageVisibility(View.VISIBLE);
+        } else {
+            setRefreshMessageVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        closeDrawer();
+        super.onStop();
+    }
+
+    private void setRefreshMessageVisibility(int visibility) {
+        noNetworkTextView.setVisibility(visibility);
+        refreshButton.setVisibility(visibility);
     }
 
 }

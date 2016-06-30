@@ -6,21 +6,21 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.vstechlab.easyfonts.EasyFonts;
 
 import artispective.blogspot.com.ng.artispective.R;
 import artispective.blogspot.com.ng.artispective.models.User;
 import artispective.blogspot.com.ng.artispective.models.Users;
-import artispective.blogspot.com.ng.artispective.utils.ArtiSpectiveEndpoint;
-import artispective.blogspot.com.ng.artispective.utils.Constants;
+import artispective.blogspot.com.ng.artispective.utils.Endpoint;
 import artispective.blogspot.com.ng.artispective.utils.Helper;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ProfileActivity extends AppCompatActivity {
     private TextView app_name, userName, userEmail, userPhone, userOccupation;
@@ -55,6 +55,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void setUpFAB() {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -66,33 +67,36 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    private void dismissDialog() {
+        if (pd != null){
+            pd.dismiss();
+        }
+    }
+
     private void getUserById(String token, String id) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.USER_PROFILE)
-                .getUserProfile(token, id).enqueue(new Callback<Users>() {
-            @Override
-            public void onResponse(Call<Users> call, Response<Users> response) {
-                if (response.code() == 200) {
-                    user = response.body().getUser();
-                    if (user != null)
-                        setView(user);
-                }
-                if (pd != null){
-                    pd.dismiss();
-                    return;
-                }
-                showMessage("User Not found. Please try again");
-            }
+        Observable<Users> observab = Endpoint.RxFactory.getEndpoint().rxGetUserProfile(token, id);
+        observab.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<Users>() {
+                    @Override
+                    public void onCompleted() {
+                        if (user != null)
+                            setView(user);
+                        dismissDialog();
+                    }
 
-            @Override
-            public void onFailure(Call<Users> call, Throwable t) {
-                user = null;
-                if (pd != null){
-                    pd.dismiss();
-                }
-                showMessage("Failed to get user. Please try again");
-            }
+                    @Override
+                    public void onError(Throwable e) {
+                        user = null;
+                        Log.e("semiu", e.getMessage());
+                        dismissDialog();
+                    }
 
-        });
+                    @Override
+                    public void onNext(Users users) {
+                        user = users.getUser();
+                    }
+                });
     }
 
     private void setView(User user) {
@@ -104,15 +108,9 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void showProgress(){
         pd = new ProgressDialog(this);
-        pd.setIndeterminate(true);
         pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        pd.setTitle("Getting Profile Ready!");
-        pd.setCancelable(true);
+        pd.setMessage("Getting Profile Ready!");
         pd.show();
-    }
-
-    private void showMessage(String message){
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
 }

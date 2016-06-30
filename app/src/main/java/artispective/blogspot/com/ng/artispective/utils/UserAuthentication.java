@@ -8,108 +8,123 @@ import artispective.blogspot.com.ng.artispective.interfaces.LogoutAuthentication
 import artispective.blogspot.com.ng.artispective.interfaces.RegisterAuthentication;
 import artispective.blogspot.com.ng.artispective.models.User;
 import artispective.blogspot.com.ng.artispective.models.Users;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import rx.Observable;
+import rx.Observer;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class UserAuthentication {
 
-    public static void register(final RegisterAuthentication registerAuthentication, User u) {
+    private static Users aUser;
 
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.REGISTER_URL).register(
-                u.getFirstName(), u.getLastName(), u.getPassword(), u.getEmailAddress(),
-                u.getPhoneNumber(), u.getCraft()).enqueue(new Callback<Users>() {
+    public static void register(final RegisterAuthentication authentication, User user) {
+        Observable<Users> observable = Endpoint.RxFactory.getEndpoint().rxRegister(
+                user.getFirstName(), user.getLastName(), user.getPassword(),
+                user.getEmailAddress(), user.getPhoneNumber(), user.getCraft());
 
-            @Override
-            public void onResponse(Call<Users> call, Response<Users> response) {
-                int code = response.code();
-                if (code == 200) {
-                    registerAuthentication.onSuccess();
-                } else {
-                    registerAuthentication.onFailure();
-                }
-            }
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Users>() {
+                    @Override
+                    public void onCompleted() {
+                        authentication.onSuccess();
+                    }
 
-            @Override
-            public void onFailure(Call<Users> call, Throwable t) {
-                registerAuthentication.onFailure();
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        authentication.onFailure();
+                    }
 
+                    @Override
+                    public void onNext(Users users) {
+
+                    }
+                });
     }
 
     public static void loginUser(final LoginAuthentication auth, String email, String password) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.LOGIN_URL)
-                .login(email, password).enqueue(new Callback<Users>() {
-
-            @Override
-            public void onResponse(Call<Users> call, Response<Users> response) {
-                if (response.code() == 200) {
-                    Users body = response.body();
-                    User user = body.getUser();
-                    Helper.setUserData("user_id", user.get_id());
-                    Helper.setUserData("user_token", body.getToken());
-                    Helper.setUserAdminStatus(user.isAdmin());
-                    auth.onSuccess();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Users> call, Throwable t) {
-                auth.onFailure();
-            }
-        });
-
-    }
-
-    public static void updateUserProfile(final RegisterAuthentication updateAuth, User user) {
-
-        String token = Helper.getUserData("user_token");
-        String userId = Helper.getUserData("user_id");
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.UPDATE_ACCOUNT)
-                .updateAccount(userId, token, user.getFirstName(), user.getLastName(),
-                user.getPassword(), user.getEmailAddress(), user.getPhoneNumber(),
-                user.getCraft()).enqueue(new Callback<Users>() {
-
+        Observable<Users> observable = Endpoint.RxFactory.getEndpoint().rxLogin(email, password);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Users>(){
                     @Override
-                    public void onResponse(Call<Users> call, Response<Users> response) {
-                        int code = response.code();
-                        if (code == 200) {
-                            showToast("Profile Updated Successfully");
-                            updateAuth.onUpdateSuccess();
-                        }
+                    public void onCompleted() {
+                        auth.onSuccess();
+                        saveUserData();
                     }
 
                     @Override
-                    public void onFailure(Call<Users> call, Throwable t) {
-                        showToast("Failed to update the user profile");
+                    public void onError(Throwable e) {
+                        auth.onFailure();
+                    }
+
+                    @Override
+                    public void onNext(Users users) {
+                        aUser = users;
                     }
                 });
+    }
 
+    private static void saveUserData() {
+        User user = aUser.getUser();
+        Helper.setUserData("user_id", user.get_id());
+        Helper.setUserData("user_token", aUser.getToken());
+        Helper.setUserAdminStatus(user.isAdmin());
+    }
+
+    public static void updateUserProfile(final RegisterAuthentication auth, User user) {
+        String token = Helper.getUserData("user_token");
+        String userId = Helper.getUserData("user_id");
+        Observable<Users> observable = Endpoint.RxFactory.getEndpoint().rxUpdateAccount(userId,
+                token, user.getFirstName(), user.getLastName(), user.getPassword(),
+                user.getEmailAddress(), user.getPhoneNumber(), user.getCraft());
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Users>(){
+                    @Override
+                    public void onNext(Users users) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        showToast("Failed to update the user profile");
+                        Log.e("semiu profile update", e.getMessage());
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        showToast("Profile Updated Successfully");
+                        auth.onUpdateSuccess();
+                    }
+                });
     }
 
     public static void logoutUser(final LogoutAuthentication log, String id, String token) {
-        ArtiSpectiveEndpoint.Factory.getArtiSpectiveEndpoint(Constants.LOGOUT).logout(id, token)
-                .enqueue(new Callback<Users>() {
+        Observable<Users> observable = Endpoint.RxFactory.getEndpoint().rxLogout(id, token);
+        observable.subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Users>() {
+                    @Override
+                    public void onCompleted() {
+                        showToast("You are logged out");
+                        Helper.setUserData("user_id", "");
+                        Helper.setUserData("user_token", "");
+                        Helper.setUserAdminStatus(false);
+                        log.onSuccess();
+                    }
 
-            @Override
-            public void onResponse(Call<Users> call, Response<Users> response) {
-                if (response.code() == 200) {
-                    showToast("You are logged out");
-                    Helper.setUserData("user_id", "");
-                    Helper.setUserData("user_token", "");
-                    Helper.setUserAdminStatus(false);
-                    log.onSuccess();
-                }
+                    @Override
+                    public void onError(Throwable e) {
+                        showToast("Something went wrong. try again");
+                        log.onFailure();
+                    }
 
-            }
+                    @Override
+                    public void onNext(Users users) {
 
-            @Override
-            public void onFailure(Call<Users> call, Throwable t) {
-                showToast("Something went wrong. try again");
-                log.onFailure();
-            }
-        });
+                    }
+                });
     }
 
     private static void showToast(String message) {
